@@ -48,9 +48,20 @@
   .gate-title{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.02em;font-size:30px;text-transform:uppercase;margin:8px 0 6px}
   .gate-sub{margin:0 0 16px;font-size:13px;line-height:1.5;color:var(--muted)}
   .gate-sub b{color:var(--text)}
-  #gateInput{width:100%;background:#0B1F19;border:1px solid var(--line);color:var(--text);padding:13px 14px;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700}
-  #gateInput:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
-  #gateInput::placeholder{color:var(--muted2);font-weight:600}
+  #gateInput,#gatePw{width:100%;background:#0B1F19;border:1px solid var(--line);color:var(--text);padding:13px 14px;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700}
+  #gatePw{margin-top:10px}
+  #gateInput:focus,#gatePw:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  #gateInput::placeholder,#gatePw::placeholder{color:var(--muted2);font-weight:600}
+  /* predict view (official picks) */
+  .rrow.locked{opacity:.92}
+  .rlock{font-size:10.5px;font-weight:700;text-align:center;margin-top:7px}
+  .rlock.open{color:var(--green)} .rlock.shut{color:var(--gold)}
+  .koeditwrap{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:7px;font-size:10px;font-weight:700;color:var(--muted2)}
+  .koedit{font-family:inherit;font-size:11px;background:#0B201A;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:3px 5px;color-scheme:dark}
+  .roundlock{border:1px dashed var(--line);border-radius:12px;padding:15px;text-align:center;color:var(--muted2);font-size:12.5px;margin-bottom:8px;line-height:1.5}
+  .rgroup .badge{font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:2px 8px;border:1px solid var(--line);color:var(--muted2)}
+  .rgroup .badge.now{color:var(--accent);border-color:var(--accent)}
+  .ptbadge.inline{position:static;margin-left:7px;display:inline-flex}
   .gate-msg{min-height:16px;font-size:12px;font-weight:700;color:var(--gold);margin:8px 2px 0}
   .gate-btn{width:100%;margin-top:10px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer;border-radius:12px;padding:13px;border:1px solid var(--accent);background:var(--accent);color:#22070F}
   .gate-btn:hover{background:var(--accent-press)}
@@ -226,12 +237,13 @@
 <div id="gate" class="gate hidden">
   <div class="gatecard">
     <div class="gate-eyebrow">World Cup 2026 · Prediction Pool</div>
-    <h2 class="gate-title">Choose your username</h2>
-    <p class="gate-sub">This is the one and only thing that identifies you in the pool. Use the <b>same username on any device</b> to keep your picks — and pick something unique so friends can tell who's who.</p>
-    <input id="gateInput" type="text" maxlength="28" placeholder="e.g. gerges" autocomplete="off" spellcheck="false">
+    <h2 class="gate-title">Sign in to the pool</h2>
+    <p class="gate-sub">Your <b>username</b> is who you are on the leaderboard. Your <b>password</b> stops anyone else from changing your predictions. Use the same pair on any device to keep your picks.</p>
+    <input id="gateInput" type="text" maxlength="28" placeholder="Username (e.g. gerges)" autocomplete="username" spellcheck="false">
+    <input id="gatePw" type="password" maxlength="40" placeholder="Password" autocomplete="current-password">
     <div id="gateMsg" class="gate-msg"></div>
     <button id="gateBtn" class="gate-btn" type="button">Enter the pool</button>
-    <p class="gate-foot">Returning? Enter the same username to pick up exactly where you left off.</p>
+    <p class="gate-foot">New username → you're creating it (pick any password). Existing one → enter its password.</p>
   </div>
 </div>
 
@@ -259,16 +271,18 @@
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-view="bracket">🗂️ My picks</button>
-      <button class="tab" data-view="results">✅ Match results <span class="n" id="resN">0</span></button>
+      <button class="tab active" data-view="bracket">🗂️ My demo bracket</button>
+      <button class="tab" data-view="predict">🎯 Predict the round <span class="n" id="predN">0</span></button>
+      <button class="tab" data-view="results">✅ Results <span class="n" id="resN">0</span></button>
       <button class="tab" data-view="board">🏆 Leaderboard <span class="n" id="boardN">1</span></button>
     </div>
   </header>
 
   <div id="setupBanner" class="setupbanner hidden"></div>
 
-  <!-- BRACKET VIEW -->
+  <!-- BRACKET VIEW (personal demo — not scored) -->
   <div class="view" id="view-bracket">
+    <p class="note" style="margin:0 0 10px"><b>Your demo bracket — just for you.</b> Predict the whole tournament for fun; this isn't scored. Your official, scored picks live under <b>🎯 Predict the round</b>.</p>
     <div class="vbar">
       <button class="btn" id="surprise">🎲 Surprise me</button>
       <button class="btn ghost" id="reset">Reset my picks</button>
@@ -282,6 +296,15 @@
       </div>
     </div>
     <div class="scroll" id="scroll"><div class="canvas" id="canvas"></div></div>
+  </div>
+
+  <!-- PREDICT VIEW (official, round-gated, kickoff-locked) -->
+  <div class="view hidden" id="view-predict">
+    <div class="vbar">
+      <p class="note" style="flex:1 1 260px"><b>Official predictions.</b> Predict the scores for the round that's on now — each game locks at kickoff, and the next round opens once this one finishes. These are what count on the leaderboard.</p>
+      <button class="btn ghost" id="copyDemo">⤵ Copy my demo picks for this round</button>
+    </div>
+    <div id="predictList"></div>
   </div>
 
   <!-- RESULTS VIEW -->
@@ -409,6 +432,15 @@ const ROUND_DATES=['Jun 28 – Jul 3','Jul 4 – 7','Jul 9 – 11','Jul 14 – 1
 const META={};[...L32,...R32].forEach(m=>META[m.id]=m.date+' · '+m.city);
 const MAIN_LIST=ROUND_GROUPS.flat();          // 31 matches
 const MAIN_IDS=new Set(MAIN_LIST.map(m=>m.id));
+const ROUND_OF=(()=>{const r={};ROUND_GROUPS.forEach((grp,gi)=>grp.forEach(m=>r[m.id]=gi));return r;})();
+
+/* kickoff datetimes (epoch ms) — seeded from the schedule; gerges can override (shared as `kickoffs`) */
+const MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function _mk(mon,day,h){return new Date(2026,(MONTHS[mon]==null?6:MONTHS[mon]),+day,h,0,0).getTime();}
+const KO_DEFAULT=(()=>{const ko={};
+  [...L32,...R32].forEach(m=>{const p=m.date.split(' ');ko[m.id]=_mk(p[0],p[1],13);});         // R32: that day, 13:00
+  for(let g=1;g<ROUND_GROUPS.length;g++){const p=ROUND_DATES[g].split(' ');ROUND_GROUPS[g].forEach(m=>{ko[m.id]=_mk(p[0],p[1],13);});}
+  return ko;})();
 
 /* =========================================================
    ENGINE (generic over a {scores,pens} state)
@@ -452,6 +484,16 @@ function pointsFor(picks,picksTM,id){
   if(pW!=null && pW===aW) return 1;
   return 0;
 }
+/* OFFICIAL picks are scored against the REAL matchups (actualTM) and real result */
+function pointsForOfficial(off,id){
+  const av=(actual.scores||{})[id]; if(!av||av[0]==null||av[1]==null) return null;
+  const aW=winnerIdFor(actual,actualTM,id); if(aW==null) return null;
+  const pv=(off&&off.scores||{})[id];
+  if(pv && pv[0]===av[0] && pv[1]===av[1]) return 2;
+  const pW=winnerIdFor(off||{},actualTM,id);   // your predicted winner among the REAL teams
+  if(pW!=null && pW===aW) return 1;
+  return 0;
+}
 
 /* =========================================================
    STATE
@@ -467,6 +509,8 @@ let lastSync=0;
 let keeper=null;            // {uid,name,ts} — who enters the real results (shared)
 let prevRanks={};           // leaderboard id -> last rank, for ▲▼ movement
 let RES_LOCK=false;         // results read-only here (someone else is keeping score)
+let official={scores:{},pens:{}};   // your OFFICIAL, round-gated picks (these are scored)
+let kickoffsShared={};              // shared kickoff-time overrides (gerges-editable)
 
 /* =========================================================
    SYNC  —  Firebase real-time  ▸  Claude store  ▸  local-only
@@ -484,19 +528,22 @@ const CLAUDE_STORE=(typeof window!=='undefined'&&window.storage)?window.storage:
 const LS=(()=>{try{return window.localStorage;}catch(e){return null;}})();
 function lsGet(k){try{return LS?JSON.parse(LS.getItem(k)):null;}catch(e){return null;}}
 function lsSet(k,v){try{LS&&LS.setItem(k,JSON.stringify(v));}catch(e){}}
-function saveMe(){lsSet('wc26_me',{id:me.id,name:me.name});}
+function saveMe(){lsSet('wc26_me',{id:me.id,name:me.name,pw:me.pw||''});}
 function saveImports(){lsSet('wc26_imports',Object.values(imports));}
-function myEntry(){return {id:me.id,name:me.name||'',picks:{scores:pred.scores,pens:pred.pens},updatedAt:Date.now()};}
+function myEntry(){return {id:me.id,name:me.name||'',pw:me.pw||'',picks:{scores:pred.scores,pens:pred.pens},official:{scores:official.scores,pens:official.pens},updatedAt:Date.now()};}
 function savePred(){lsSet('wc26_pred',{scores:pred.scores,pens:pred.pens});}
-/* a player "exists" in the pool only once they have a name or at least one pick — avoids ghost rows */
-function hasPresence(){return !!(me.name&&me.name.trim()) || Object.keys(pred.scores).length>0 || Object.keys(pred.pens).length>0;}
-function entryHasContent(e){return !!(e && ((e.name&&String(e.name).trim()) || (e.picks&&((e.picks.scores&&Object.keys(e.picks.scores).length)||(e.picks.pens&&Object.keys(e.picks.pens).length)))));}
+function saveOfficial(){lsSet('wc26_official',{scores:official.scores,pens:official.pens});}
+/* soft password hash (cyrb53), salted by the username's id — protects picks from casual overwrite */
+function hashPw(pw,salt){let h1=0xdeadbeef,h2=0x41c6ce57;const s=String(salt||'')+':'+String(pw||'');for(let i=0,c;i<s.length;i++){c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);}
+/* a player "exists" in the pool only once they have a name or any pick — avoids ghost rows */
+function hasPresence(){return !!(me.name&&me.name.trim()) || Object.keys(pred.scores).length>0 || Object.keys(pred.pens).length>0 || Object.keys(official.scores).length>0;}
+function entryHasContent(e){return !!(e && ((e.name&&String(e.name).trim()) || (e.picks&&(Object.keys(e.picks.scores||{}).length||Object.keys(e.picks.pens||{}).length)) || (e.official&&(Object.keys(e.official.scores||{}).length||Object.keys(e.official.pens||{}).length))));}
 /* the player's USERNAME is the one and only identity; slug it into a stable id */
 function slugId(name){const s=String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'');return s?('u_'+s.slice(0,40)):'';}
 let lastRemoteRaw={};       // latest entries snapshot (to load your bracket when you sign in with your username)
 function refreshWhoChip(){const el=document.getElementById('whoName');if(el)el.textContent=me.name||'—';}
 
-const handlers={entries:()=>{},results:()=>{},keeper:()=>{}};
+const handlers={entries:()=>{},results:()=>{},keeper:()=>{},kickoffs:()=>{}};
 let fbRoot=null;
 const SYNC={
   mode:'local',
@@ -509,7 +556,7 @@ const SYNC={
         this.mode='firebase';
         fbRoot.child('entries').on('value',s=>{
           const raw=s.val()||{},out={};
-          Object.keys(raw).forEach(k=>{const e=raw[k];if(!e||!e.id)return;let picks={};try{picks=e.p?JSON.parse(e.p):(e.picks||{});}catch(_){}out[e.id]={id:e.id,name:e.name||'',picks:normPicks(picks),updatedAt:e.u||e.updatedAt||0};});
+          Object.keys(raw).forEach(k=>{const e=raw[k];if(!e||!e.id)return;let picks={},off={};try{picks=e.p?JSON.parse(e.p):(e.picks||{});}catch(_){}try{off=e.of?JSON.parse(e.of):(e.official||{});}catch(_){}out[e.id]={id:e.id,name:e.name||'',pw:e.pw||'',picks:normPicks(picks),official:normPicks(off),updatedAt:e.u||e.updatedAt||0};});
           handlers.entries(out);
         });
         fbRoot.child('results').on('value',s=>{
@@ -518,6 +565,7 @@ const SYNC={
           handlers.results({scores:d.scores||{},pens:d.pens||{},updatedAt:v.u||0,by:v.by||''});
         });
         fbRoot.child('keeper').on('value',s=>handlers.keeper(s.val()||null));
+        fbRoot.child('kickoffs').on('value',s=>handlers.kickoffs(s.val()||{}));
         return;
       }catch(e){console.warn('[sync] Firebase init failed:',e);fbRoot=null;}
     }
@@ -525,8 +573,12 @@ const SYNC={
     this.mode='local';
   },
   async putEntry(en){
-    if(this.mode==='firebase'){try{await fbRoot.child('entries/'+en.id).set({id:en.id,name:en.name||'',p:JSON.stringify(normPicks(en.picks)),u:en.updatedAt||0});}catch(e){}}
+    if(this.mode==='firebase'){try{await fbRoot.child('entries/'+en.id).set({id:en.id,name:en.name||'',pw:en.pw||'',p:JSON.stringify(normPicks(en.picks)),of:JSON.stringify(normPicks(en.official)),u:en.updatedAt||0});}catch(e){}}
     else if(this.mode==='claude'){try{await CLAUDE_STORE.set('entry:'+en.id,JSON.stringify(en),true);}catch(e){}}
+  },
+  async putKickoffs(k){
+    if(this.mode==='firebase'){try{await fbRoot.child('kickoffs').set(k);}catch(e){}}
+    else if(this.mode==='claude'){try{await CLAUDE_STORE.set('kickoffs',JSON.stringify(k),true);}catch(e){}}
   },
   async removeEntry(id){
     if(this.mode==='firebase'){try{await fbRoot.child('entries/'+id).remove();}catch(e){}}
@@ -544,10 +596,11 @@ const SYNC={
   async pollClaude(){
     if(this.mode!=='claude')return;
     const ents={};
-    try{const l=await CLAUDE_STORE.list('entry:',true);if(l&&l.keys)for(const k of l.keys){const r=await CLAUDE_STORE.get(k,true);if(r&&r.value){const e=JSON.parse(r.value);if(e&&e.id)ents[e.id]={...e,picks:normPicks(e.picks)};}}}catch(e){}
+    try{const l=await CLAUDE_STORE.list('entry:',true);if(l&&l.keys)for(const k of l.keys){const r=await CLAUDE_STORE.get(k,true);if(r&&r.value){const e=JSON.parse(r.value);if(e&&e.id)ents[e.id]={...e,picks:normPicks(e.picks),official:normPicks(e.official)};}}}catch(e){}
     handlers.entries(ents);
     try{const r=await CLAUDE_STORE.get('results',true);handlers.results(r&&r.value?JSON.parse(r.value):null);}catch(e){}
     try{const r=await CLAUDE_STORE.get('keeper',true);handlers.keeper(r&&r.value?JSON.parse(r.value):null);}catch(e){}
+    try{const r=await CLAUDE_STORE.get('kickoffs',true);handlers.kickoffs(r&&r.value?JSON.parse(r.value):{});}catch(e){}
   }
 };
 
@@ -586,6 +639,24 @@ let toastT=null;
 function toast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);}
 
 /* =========================================================
+   ROUNDS & KICKOFF LOCKS  (official predictions)
+   • only the CURRENT round is open (first round not yet finished)
+   • a game closes at its kickoff (or once it has a result)
+   • next round opens once the current one is fully decided
+========================================================= */
+function koOf(id){return (kickoffsShared&&kickoffsShared[id]!=null)?kickoffsShared[id]:KO_DEFAULT[id];}
+function resulted(id){return winnerIdFor(actual,actualTM,id)!=null;}
+function matchupKnown(id){const p=actualTM[id];return !!(p&&p[0]&&p[1]);}
+function roundComplete(g){return ROUND_GROUPS[g].every(m=>resulted(m.id));}
+function currentRound(){for(let g=0;g<ROUND_GROUPS.length;g++){if(!roundComplete(g))return g;}return ROUND_GROUPS.length-1;}
+function predictOpen(id){
+  if(ROUND_OF[id]!==currentRound())return false;   // current round only
+  if(!matchupKnown(id))return false;                // real teams must be set
+  if(resulted(id))return false;                     // already played
+  return Date.now()<koOf(id);                        // before kickoff
+}
+
+/* =========================================================
    MUTATIONS
 ========================================================= */
 function stepState(state,id,slot,delta){
@@ -599,8 +670,9 @@ function stepState(state,id,slot,delta){
 }
 function setPenState(state,id,team){state.pens[id]=(state.pens[id]===team?undefined:team);if(state.pens[id]==null)delete state.pens[id];}
 
-function afterPred(){predTM=resolveState(pred,true);entries[me.id]={id:me.id,name:me.name,picks:{scores:pred.scores,pens:pred.pens},updatedAt:Date.now()};savePred();schedule('entry');renderActive();updateCounts();}
+function afterPred(){predTM=resolveState(pred,true);entries[me.id]=myEntry();savePred();schedule('entry');renderActive();updateCounts();}
 function afterActual(){actual.updatedAt=Date.now();actualTM=resolveState(actual,true);schedule('results');renderActive();updateCounts();}
+function afterOfficial(){entries[me.id]=myEntry();saveOfficial();schedule('entry');renderActive();updateCounts();}
 
 const rnd=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
 function surprise(){
@@ -668,9 +740,7 @@ function bMatch(id,x,cy,isR32){
   const st=s=>(!pair[s]||w==null)?'':(pair[s].id===w?'win':'lose');
   let h='';
   if(isR32) h+=`<div class="meta" style="left:${x}px;top:${top-16}px;width:${CARDW}px">${META[id]||''}</div>`;
-  let badge='';
-  if(MAIN_IDS.has(id)){const p=pointsFor(pred,predTM,id);if(p!=null)badge=`<div class="ptbadge ${p===2?'p2':p===1?'p1':''}">+${p}</div>`;}
-  h+=`<div class="match" style="left:${x}px;top:${top}px">`+badge
+  h+=`<div class="match" style="left:${x}px;top:${top}px">`
     +bTeamRow(id,0,pair[0],st(0))+`<div class="divider"></div>`+bTeamRow(id,1,pair[1],st(1))
     +(tied?pensFooterHTML('pred',pred,id,pair,'pens'):'')+`</div>`;
   return h;
@@ -757,14 +827,64 @@ function renderResults(){
 }
 
 /* =========================================================
+   RENDER — official predictions (round-gated, kickoff-locked)
+========================================================= */
+function lockLabel(id){
+  if(resulted(id))return `<div class="rlock shut">Played · result is in</div>`;
+  const ko=koOf(id);
+  if(Date.now()>=ko)return `<div class="rlock shut">🔒 Closed at kickoff</div>`;
+  return `<div class="rlock open">Closes ${new Date(ko).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>`;
+}
+function koEditor(id){
+  if(!isAdmin())return '';
+  const d=new Date(koOf(id)),p=n=>String(n).padStart(2,'0');
+  const val=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  return `<div class="koeditwrap">⏰ kickoff <input class="koedit" type="datetime-local" data-ko="${id}" value="${val}"></div>`;
+}
+function pRow(m,open){
+  const pair=actualTM[m.id]||[null,null], a=pair[0],b=pair[1];
+  const sa=(official.scores[m.id]||[null,null])[0], sb=(official.scores[m.id]||[null,null])[1];
+  const tied=isTie(official,actualTM,m.id), dis=!open;
+  const teamA=a?`<span class="flag">${a.flag}</span><span class="tn">${a.name}</span>`:`<span class="tn" style="color:var(--muted2)">TBD</span>`;
+  const teamB=b?`<span class="tn">${b.name}</span><span class="flag">${b.flag}</span>`:`<span class="tn" style="color:var(--muted2)">TBD</span>`;
+  const p=pointsForOfficial(official,m.id);
+  const badge=(p!=null)?`<span class="ptbadge inline ${p===2?'p2':p===1?'p1':''}">+${p}</span>`:'';
+  return `<div class="rrow${dis?' locked':''}">`
+    +`<div class="rtop">`
+      +`<div class="rteam a">${teamA}</div>`
+      +`<div class="rmid">${stepperHTML('official',m.id,0,sa,dis)}<span class="dash">–</span>${stepperHTML('official',m.id,1,sb,dis)}</div>`
+      +`<div class="rteam">${teamB}${badge}</div>`
+    +`</div>`
+    +(m.isR32?`<div class="rsub">${META[m.id]||''}</div>`:'')
+    +(tied?pensFooterHTML('official',official,m.id,pair,'rpens'):'')
+    +lockLabel(m.id)+koEditor(m.id)
+    +`</div>`;
+}
+function renderPredict(){
+  actualTM=resolveState(actual,true);
+  const cur=currentRound(), allDone=ROUND_GROUPS.every((g,gi)=>roundComplete(gi));
+  let h='';
+  if(!sharedSync()) h+=`<div class="roundlock">Official predictions sync through the pool — set up live sync to use them.</div>`;
+  ROUND_GROUPS.forEach((grp,gi)=>{
+    const badge=allDone?`<span class="badge">done</span>`:gi<cur?`<span class="badge">done</span>`:gi===cur?`<span class="badge now">predict now</span>`:`<span class="badge">locked</span>`;
+    h+=`<div class="rgroup">${ROUND_NAMES[gi]} ${badge}<span class="ln"></span></div>`;
+    if(gi>cur){h+=`<div class="roundlock">Opens when the ${ROUND_NAMES[gi-1]} finishes — then the real matchups appear here to predict.</div>`;return;}
+    const rows=grp.map(m=>({...m,isR32:gi===0})).filter(m=>matchupKnown(m.id));
+    if(!rows.length){h+=`<div class="roundlock">Matchups for this round aren’t set yet.</div>`;return;}
+    rows.forEach(m=>h+=pRow(m,predictOpen(m.id)));
+  });
+  document.getElementById('predictList').innerHTML=h;
+}
+
+/* =========================================================
    RENDER — leaderboard
 ========================================================= */
 function allEntries(){const map={};Object.values(imports).forEach(e=>map[e.id]=e);Object.values(entries).forEach(e=>map[e.id]=e);return Object.values(map);}
 function computeBoard(){
   return allEntries().map(e=>{
-    const tmP=resolveState({scores:(e.picks&&e.picks.scores)||{},pens:(e.picks&&e.picks.pens)||{}},false);
+    const off=normPicks(e.official);
     let pts=0,exact=0,team=0,scored=0;
-    MAIN_IDS.forEach(id=>{const p=pointsFor(e.picks,tmP,id);if(p==null)return;scored++;if(p===2){pts+=2;exact++;}else if(p===1){pts+=1;team++;}});
+    MAIN_IDS.forEach(id=>{const p=pointsForOfficial(off,id);if(p==null)return;scored++;if(p===2){pts+=2;exact++;}else if(p===1){pts+=1;team++;}});
     return {id:e.id,name:e.name||'(no name)',pts,exact,team,scored,me:e.id===me.id};
   }).sort((x,y)=>y.pts-x.pts||y.exact-x.exact||x.name.localeCompare(y.name));
 }
@@ -777,7 +897,7 @@ function renderBoard(){
     +(keeper&&keeper.uid?` · scores kept by <b style="color:var(--text)">${esc(keeper.name||'a friend')}${keeperIsMe()?' (you)':''}</b>`:'');
   const list=document.getElementById('boardList');
   if(rows.length<=1 && scored===0){
-    list.innerHTML=`<div class="empty">Add your name above, then make your picks.<br>Enter match results to start scoring — the table updates live.</div>`;
+    list.innerHTML=`<div class="empty">This is the <b>official</b> leaderboard. Make your picks in <b>🎯 Predict the round</b> — points appear here as each round's games finish.</div>`;
   }else{
     list.innerHTML=rows.map((r,i)=>{
       const rank=i+1,first=rank===1&&r.pts>0,prev=prevRanks[r.id];
@@ -799,19 +919,20 @@ function renderBoard(){
 ========================================================= */
 function renderActive(){
   if(view==='bracket')renderBracket();
+  else if(view==='predict')renderPredict();
   else if(view==='results')renderResults();
   else renderBoard();
 }
 function updateCounts(){
   document.getElementById('resN').textContent=matchesScored();
   document.getElementById('boardN').textContent=allEntries().length;
+  const pn=document.getElementById('predN');
+  if(pn){let open=0;ROUND_GROUPS[currentRound()].forEach(m=>{if(predictOpen(m.id))open++;});pn.textContent=open;}
 }
 function setView(v){
   view=v;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));
-  document.getElementById('view-bracket').classList.toggle('hidden',v!=='bracket');
-  document.getElementById('view-results').classList.toggle('hidden',v!=='results');
-  document.getElementById('view-board').classList.toggle('hidden',v!=='board');
+  ['bracket','predict','results','board'].forEach(k=>document.getElementById('view-'+k).classList.toggle('hidden',v!==k));
   renderActive();
   if(v==='board')refreshExport();
   if(v==='bracket')requestAnimationFrame(()=>{const sc=document.getElementById('scroll');sc.scrollLeft=Math.max(0,X_CENTER+CARDW/2-sc.clientWidth/2);});
@@ -835,19 +956,32 @@ function addFriend(){
 ========================================================= */
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
-  const isActual=el.dataset.st==='actual';
-  if(isActual && !canEditResults()){toast('Only gerges can enter match results');return;}
-  const st=isActual?actual:pred, id=el.dataset.m, act=el.dataset.act;
+  const stName=el.dataset.st, id=el.dataset.m, act=el.dataset.act;
+  if(stName==='actual' && !canEditResults()){toast('Only gerges can enter match results');return;}
+  if(stName==='official' && !predictOpen(id)){toast('This game is closed for predictions');return;}
+  const st=stName==='actual'?actual:(stName==='official'?official:pred);
   if(act==='inc')stepState(st,id,+el.dataset.s,1);
   else if(act==='dec')stepState(st,id,+el.dataset.s,-1);
   else if(act==='pen')setPenState(st,id,el.dataset.team);
-  if(isActual)afterActual();else afterPred();
+  if(stName==='actual')afterActual();else if(stName==='official')afterOfficial();else afterPred();
+});
+document.addEventListener('change',e=>{
+  const el=e.target.closest('[data-ko]');if(!el)return;
+  if(!isAdmin()){toast('Only gerges can set kickoff times');return;}
+  const id=el.dataset.ko,ms=new Date(el.value).getTime();
+  if(isNaN(ms))return;
+  kickoffsShared[id]=ms;SYNC.putKickoffs(kickoffsShared);
+  if(view==='predict')renderPredict();updateCounts();
 });
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>setView(t.dataset.view)));
 document.getElementById('changeName').addEventListener('click',showGate);
 document.getElementById('gateBtn').addEventListener('click',submitGate);
 document.getElementById('gateInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitGate();}});
 document.getElementById('gateInput').addEventListener('input',()=>{document.getElementById('gateMsg').textContent='';});
+document.getElementById('copyDemo').addEventListener('click',()=>{
+  let n=0;ROUND_GROUPS[currentRound()].forEach(m=>{const id=m.id;if(predictOpen(id)&&pred.scores[id]){official.scores[id]=pred.scores[id].slice();if(pred.pens[id])official.pens[id]=pred.pens[id];n++;}});
+  if(n){afterOfficial();toast('Copied '+n+' demo pick'+(n>1?'s':'')+' into your official picks');}else toast('No open demo picks to copy for this round');
+});
 document.getElementById('surprise').addEventListener('click',surprise);
 document.getElementById('reset').addEventListener('click',reset);
 document.getElementById('print').addEventListener('click',()=>window.print());
@@ -893,10 +1027,13 @@ function updateSyncBadge(){
 let restoredMine=false;
 function restoreMine(e){
   restoredMine=true;
-  const empty=!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length;
-  if(empty&&e.picks){const p=normPicks(e.picks);if(Object.keys(p.scores).length||Object.keys(p.pens).length){pred.scores=p.scores;pred.pens=p.pens;savePred();predTM=resolveState(pred,true);if(view==='bracket')renderBracket();}}
+  if(!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length&&e.picks){const p=normPicks(e.picks);if(Object.keys(p.scores).length||Object.keys(p.pens).length){pred.scores=p.scores;pred.pens=p.pens;savePred();predTM=resolveState(pred,true);}}
+  if(!Object.keys(official.scores).length&&!Object.keys(official.pens).length&&e.official){const o=normPicks(e.official);if(Object.keys(o.scores).length||Object.keys(o.pens).length){official.scores=o.scores;official.pens=o.pens;saveOfficial();}}
   if(!me.name&&e.name){me.name=String(e.name);refreshWhoChip();saveMe();}
+  if(!me.pw&&e.pw){me.pw=e.pw;saveMe();}
+  renderActive();
 }
+function onRemoteKickoffs(k){kickoffsShared=k||{};if(view==='predict')renderPredict();updateCounts();}
 function onRemoteEntries(map){
   lastRemoteRaw=map||{};
   const next={};
@@ -918,10 +1055,10 @@ function applyName(name,opts){
     const old=me.id;
     if(sharedSync())SYNC.removeEntry(old);        // drop my row under the old id (no leftovers)
     me.id=targetId;restoredMine=false;
-    const r=lastRemoteRaw[targetId];              // signing in as an existing username? load its bracket
-    if(r&&!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length){
-      const p=normPicks(r.picks);
-      if(Object.keys(p.scores).length||Object.keys(p.pens).length){pred.scores=p.scores;pred.pens=p.pens;savePred();predTM=resolveState(pred,true);if(view==='bracket')renderBracket();}
+    const r=lastRemoteRaw[targetId];              // signing in as an existing username? load its picks
+    if(r){
+      if(!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length){const p=normPicks(r.picks);if(Object.keys(p.scores).length||Object.keys(p.pens).length){pred.scores=p.scores;pred.pens=p.pens;savePred();predTM=resolveState(pred,true);}}
+      if(!Object.keys(official.scores).length&&!Object.keys(official.pens).length){const o=normPicks(r.official);if(Object.keys(o.scores).length||Object.keys(o.pens).length){official.scores=o.scores;official.pens=o.pens;saveOfficial();}}
     }
   }
   me.name=name;
@@ -951,15 +1088,29 @@ function onRemoteKeeper(k){
 function showGate(){
   const inp=document.getElementById('gateInput');
   inp.value=me.name||'';
+  document.getElementById('gatePw').value='';
   document.getElementById('gateMsg').textContent='';
-  document.getElementById('gateBtn').textContent=me.name?'Continue as '+me.name:'Enter the pool';
+  document.getElementById('gateBtn').textContent=me.name?'Continue':'Enter the pool';
   document.getElementById('gate').classList.remove('hidden');
   setTimeout(()=>{inp.focus();inp.select();},40);
 }
 function hideGate(){document.getElementById('gate').classList.add('hidden');}
 function submitGate(){
-  const inp=document.getElementById('gateInput'),val=String(inp.value||'').trim();
-  if(!slugId(val)){document.getElementById('gateMsg').textContent='Enter a username with at least one letter or number.';inp.focus();return;}
+  const inp=document.getElementById('gateInput'),pwEl=document.getElementById('gatePw');
+  const val=String(inp.value||'').trim(), pw=String(pwEl.value||''), id=slugId(val);
+  const msg=t=>{document.getElementById('gateMsg').textContent=t;};
+  if(!id){msg('Enter a username with at least one letter or number.');inp.focus();return;}
+  const existing=lastRemoteRaw[id];                       // is this username already in the pool?
+  const remotePw=existing&&existing.pw;
+  if(remotePw){                                            // taken → must prove it's you
+    const ownsThisDevice=(me.id===id&&me.pw&&me.pw===remotePw);
+    const typedOk=(pw&&hashPw(pw,id)===remotePw);
+    if(!ownsThisDevice&&!typedOk){msg(pw?'Wrong password for “'+val+'”.':'“'+val+'” is taken — enter its password.');pwEl.focus();return;}
+    me.pw=remotePw;
+  }else{                                                   // new username → set a password
+    if(!pw){msg('Pick a password for “'+val+'” (so only you can edit it).');pwEl.focus();return;}
+    me.pw=hashPw(pw,id);
+  }
   applyName(val,{syncField:true});       // username becomes your identity (and pushes you into the pool)
   hideGate();
   renderActive();updateCounts();updateKeeperUI();
@@ -968,7 +1119,9 @@ function init(){
   const m=lsGet('wc26_me');
   me.id=(m&&m.id)?m.id:genId();             // placeholder id until a username is chosen at the gate
   me.name=(m&&m.name)||'';
-  const sp=lsGet('wc26_pred');if(sp){pred.scores=sp.scores||{};pred.pens=sp.pens||{};}  // restore my bracket
+  me.pw=(m&&m.pw)||'';
+  const sp=lsGet('wc26_pred');if(sp){pred.scores=sp.scores||{};pred.pens=sp.pens||{};}        // demo bracket
+  const so=lsGet('wc26_official');if(so){official.scores=so.scores||{};official.pens=so.pens||{};}  // official picks
   const imp=lsGet('wc26_imports');if(Array.isArray(imp))imp.forEach(e=>{if(e&&e.id)imports[e.id]=e;});
   refreshWhoChip();
   predTM=resolveState(pred,true);actualTM=resolveState(actual,true);
@@ -976,12 +1129,14 @@ function init(){
   SYNC.on('entries',onRemoteEntries);
   SYNC.on('results',onRemoteResults);
   SYNC.on('keeper',onRemoteKeeper);
+  SYNC.on('kickoffs',onRemoteKickoffs);
   SYNC.start();
 
   setView('bracket');updateCounts();updateSyncBadge();updateKeeperUI();
   if(SYNC.mode==='claude'){SYNC.pollClaude();setInterval(()=>SYNC.pollClaude(),6000);}
+  setInterval(()=>{updateCounts();if(view==='predict')renderPredict();},30000);  // roll kickoff locks over time
 
-  showGate();   // every open asks for your username before you're in the pool
+  showGate();   // every open asks for your username + password before you're in the pool
 }
 init();
 </script>
