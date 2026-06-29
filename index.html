@@ -549,32 +549,25 @@ function schedule(kind){clearTimeout(saveTimers[kind]);saveTimers[kind]=setTimeo
 },400);}
 
 /* =========================================================
-   RESULTS KEEPER  (only the keeper edits the live scores)
+   RESULTS ADMIN  (only the admin username — "gerges" — edits results)
 ========================================================= */
+const ADMIN_ID='u_gerges';                 // = slugId('gerges'); change here to hand off control
 function sharedSync(){return SYNC.mode==='firebase'||SYNC.mode==='claude';}
-function keeperIsMe(){return !!(keeper&&keeper.uid===me.id);}
-function othersKeeping(){return !!(keeper&&keeper.uid&&keeper.uid!==me.id);}
-function claimKeeper(){keeper={uid:me.id,name:me.name||'A friend',ts:Date.now()};SYNC.putKeeper(keeper);updateKeeperUI();if(view==='results')renderResults();}
-function stepDownKeeper(){keeper=null;SYNC.putKeeper(null);updateKeeperUI();if(view==='results')renderResults();}
-function canEditResults(){
-  if(!sharedSync())return true;          // local-only: edit freely
-  if(othersKeeping())return false;       // someone else holds the pen
-  if(!keeper)claimKeeper();              // nobody yet → you become keeper
-  return true;
-}
+function isAdmin(){return me.id===ADMIN_ID;}
+function keeperIsMe(){return isAdmin();}                 // kept for callers
+function othersKeeping(){return sharedSync()&&!isAdmin();}  // results locked for everyone but the admin
+function canEditResults(){return !sharedSync()||isAdmin();}
 function updateKeeperUI(){
   const bar=document.getElementById('keeperBar');if(!bar)return;
   RES_LOCK=othersKeeping();
   if(!sharedSync()){bar.classList.add('hidden');return;}
   bar.classList.remove('hidden','mine','locked');
-  if(keeperIsMe()){
+  if(isAdmin()){
     bar.classList.add('mine');
-    bar.innerHTML=`<span class="kicon">✅</span><span>You’re the <b>results keeper</b> — enter each real score as games finish and everyone updates live.</span><button class="kbtn" data-kact="step">Step down</button>`;
-  }else if(othersKeeping()){
-    bar.classList.add('locked');
-    bar.innerHTML=`<span class="kicon">🔒</span><span><b>${esc(keeper.name||'A friend')}</b> is keeping score — results are read-only for you, but the table still updates live.</span><button class="kbtn" data-kact="take">Take over</button>`;
+    bar.innerHTML=`<span class="kicon">✅</span><span>You control the <b>official results</b> — enter each real score as games finish and everyone updates live.</span>`;
   }else{
-    bar.innerHTML=`<span class="kicon">📋</span><span><b>No results keeper yet.</b> Whoever’s watching the games should keep score — just start entering results, or claim it now.</span><button class="kbtn" data-kact="claim">I’ll keep score</button>`;
+    bar.classList.add('locked');
+    bar.innerHTML=`<span class="kicon">🔒</span><span>Only <b>gerges</b> can enter match results. Make your picks freely — the table updates live as results come in.</span>`;
   }
 }
 
@@ -611,7 +604,7 @@ function surprise(){
   afterPred();
 }
 function fillResultsRandom(){
-  if(!canEditResults()){toast(`${(keeper&&keeper.name)||'Someone'} is keeping score`);return;}
+  if(!canEditResults()){toast('Only gerges can enter match results');return;}
   ROUND_GROUPS.forEach(grp=>{
     actualTM=resolveState(actual,true);
     grp.forEach(m=>{const p=actualTM[m.id];if(p&&p[0]&&p[1]&&winnerIdFor(actual,actualTM,m.id)==null){const a=rnd(0,3),b=rnd(0,3);actual.scores[m.id]=[a,b];if(a===b)actual.pens[m.id]=(Math.random()<.5?p[0]:p[1]).id;}});
@@ -621,7 +614,7 @@ function fillResultsRandom(){
 function reset(){if(!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length)return;
   if(confirm('Clear all of YOUR picks? (Results and other players are untouched.)')){pred={scores:{},pens:{}};afterPred();}}
 function clearResults(){
-  if(othersKeeping()){toast(`${keeper.name||'Someone'} is keeping score`);return;}
+  if(othersKeeping()){toast('Only gerges can clear results');return;}
   if(!Object.keys(actual.scores).length&&!Object.keys(actual.pens).length)return;
   if(confirm('Clear ALL match results for everyone in the pool?')){actual={scores:{},pens:{},updatedAt:Date.now()};afterActual();}}
 
@@ -833,17 +826,12 @@ function addFriend(){
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
   const isActual=el.dataset.st==='actual';
-  if(isActual && othersKeeping()){toast(`${keeper.name||'Someone'} is keeping score`);return;}
-  if(isActual && !canEditResults())return;
+  if(isActual && !canEditResults()){toast('Only gerges can enter match results');return;}
   const st=isActual?actual:pred, id=el.dataset.m, act=el.dataset.act;
   if(act==='inc')stepState(st,id,+el.dataset.s,1);
   else if(act==='dec')stepState(st,id,+el.dataset.s,-1);
   else if(act==='pen')setPenState(st,id,el.dataset.team);
   if(isActual)afterActual();else afterPred();
-});
-document.getElementById('keeperBar').addEventListener('click',e=>{
-  const b=e.target.closest('[data-kact]');if(!b)return;
-  if(b.dataset.kact==='step')stepDownKeeper();else claimKeeper();
 });
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>setView(t.dataset.view)));
 document.getElementById('changeName').addEventListener('click',showGate);
@@ -919,7 +907,6 @@ function applyName(name,opts){
   if(targetId!==me.id){
     const old=me.id;
     if(sharedSync())SYNC.removeEntry(old);        // drop my row under the old id (no leftovers)
-    if(keeper&&keeper.uid===old){keeper.uid=targetId;SYNC.putKeeper(keeper);}
     me.id=targetId;restoredMine=false;
     const r=lastRemoteRaw[targetId];              // signing in as an existing username? load its bracket
     if(r&&!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length){
@@ -932,7 +919,8 @@ function applyName(name,opts){
   document.title=name?`${name} — World Cup 2026 Pool`:'World Cup 2026 — Prediction Pool';
   entries[me.id]=myEntry();
   saveMe();
-  if(keeperIsMe()){keeper.name=name||'A friend';SYNC.putKeeper(keeper);updateKeeperUI();}
+  if(isAdmin()){keeper={uid:ADMIN_ID,name:name||'gerges',ts:(keeper&&keeper.ts)||Date.now()};SYNC.putKeeper(keeper);}   // gerges = permanent results admin
+  updateKeeperUI();
   schedule('entry');
   if(!opts.initial){updateCounts();if(view==='board')renderBoard();}
 }
@@ -945,11 +933,9 @@ function onRemoteResults(r){
   lastSync=Date.now();updateSyncBadge();
 }
 function onRemoteKeeper(k){
-  const was=keeper&&keeper.uid;
-  keeper=(k&&k.uid)?k:null;
+  keeper=(k&&k.uid)?k:null;       // cosmetic now ("scores kept by gerges"); control is by ADMIN_ID
   updateKeeperUI();
   if(view==='results')renderResults();
-  if(keeper&&keeper.uid!==me.id&&keeper.uid!==was)toast(`${keeper.name||'A friend'} is now keeping score`);
 }
 /* ---- username entry gate: the only way you get an identity ---- */
 function showGate(){
