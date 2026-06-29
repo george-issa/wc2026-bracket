@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Cup 2026 — Prediction Pool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A1A15; --panel:#0F241E; --card:#163A2F;
+    --line:#2C5042; --soft:#284A3E;
+    --text:#EDF5F0; --muted:#90B1A2; --muted2:#658375;
+    --accent:#FF4385; --accent-press:#FF74A4; --accent-dim:rgba(255,67,133,.18);
+    --gold:#FFC94D; --gold-dim:rgba(255,201,77,.16);
+    --green:#3ddc91;
+    --CARDW:200px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:'Archivo',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1500px;margin:0 auto;padding:18px 16px 46px}
+
+  /* header */
+  header.hd{background:linear-gradient(180deg,#12281F,#0E211B);border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+  .hosts{font-size:12.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:8px}
+  .hosts .fl{font-size:15px}
+  .eyebrow{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);background:var(--accent-dim);padding:5px 10px;border-radius:999px;margin-bottom:9px}
+  .title{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.02em;line-height:.9;font-size:clamp(32px,7vw,54px);margin:2px 0;text-transform:uppercase}
+  .title .yr{color:var(--accent)}
+  .sub{color:var(--muted);font-size:14px;max-width:66ch;line-height:1.5;margin:8px 0 0}
+
+  .toprow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-top:16px}
+  .namebox{display:flex;flex-direction:column;gap:5px}
+  .namebox label{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted2);font-weight:700}
+  .namebox input{background:#0B1F19;border:1px solid var(--line);color:var(--text);padding:10px 13px;border-radius:11px;font-family:inherit;font-size:14.5px;min-width:210px;font-weight:600}
+  .namebox input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .namebox input::placeholder{color:var(--muted2)}
+  .idchip{display:inline-flex;align-items:center;gap:10px;background:#0B1F19;border:1px solid var(--line);color:var(--text);padding:9px 12px;border-radius:11px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;min-width:210px}
+  .idchip:hover{border-color:var(--accent)}
+  .idchip #whoName{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .idchip .idedit{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+  /* username entry gate */
+  .gate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(900px 500px at 50% -10%, #15302540 0%, transparent 60%),rgba(6,15,12,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .gatecard{width:100%;max-width:420px;background:linear-gradient(180deg,#12281F,#0E211B);border:1px solid var(--line);border-radius:18px;padding:24px 22px;box-shadow:0 30px 80px -24px rgba(0,0,0,.8)}
+  .gate-eyebrow{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+  .gate-title{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.02em;font-size:30px;text-transform:uppercase;margin:8px 0 6px}
+  .gate-sub{margin:0 0 16px;font-size:13px;line-height:1.5;color:var(--muted)}
+  .gate-sub b{color:var(--text)}
+  #gateInput{width:100%;background:#0B1F19;border:1px solid var(--line);color:var(--text);padding:13px 14px;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700}
+  #gateInput:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  #gateInput::placeholder{color:var(--muted2);font-weight:600}
+  .gate-msg{min-height:16px;font-size:12px;font-weight:700;color:var(--gold);margin:8px 2px 0}
+  .gate-btn{width:100%;margin-top:10px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer;border-radius:12px;padding:13px;border:1px solid var(--accent);background:var(--accent);color:#22070F}
+  .gate-btn:hover{background:var(--accent-press)}
+  .gate-foot{margin:12px 2px 0;font-size:11.5px;color:var(--muted2);line-height:1.5}
+  .sync{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;padding-bottom:4px}
+  .sync .dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(61,220,145,.18)}
+  .sync.off .dot{background:#7a8f86;box-shadow:none}
+
+  .scorerule{margin-top:13px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12.5px;color:var(--muted);font-weight:600}
+  .scorerule .tag{display:inline-flex;align-items:center;gap:6px}
+  .scorerule .pts{font-family:'Anton',sans-serif;font-size:14px;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px}
+  .scorerule .pts.two{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold)}
+  .scorerule .pts.one{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent)}
+
+  /* tabs */
+  .tabs{display:flex;gap:7px;margin:14px 0 0;flex-wrap:wrap}
+  .tab{font-weight:700;font-size:13.5px;padding:11px 16px;border-radius:12px;border:1px solid var(--line);background:#102620;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px}
+  .tab:hover{background:#19332A}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#22070F}
+  .tab .n{font-size:11px;font-weight:800;background:rgba(0,0,0,.18);padding:1px 7px;border-radius:999px}
+  .tab.active .n{background:rgba(0,0,0,.18)}
+
+  .view{margin-top:14px}
+  .hidden{display:none !important}
+  .vbar{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:10px}
+  .btn{font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;border-radius:11px;padding:9px 13px;border:1px solid var(--line);background:#102620;color:var(--text);transition:background .15s,transform .04s}
+  .btn:hover{background:#19332A}.btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .note b{color:var(--text)}
+  .key{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;font-weight:600}
+  .key .sw{display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;width:22px;height:22px;border-radius:7px;border:1px solid var(--line);background:#0E251E;color:var(--text)}
+  .key .sw.pk{color:var(--accent);border-color:var(--accent)}
+  .navchips{display:flex;gap:8px;margin-left:auto}
+  .chip{font-size:12px;font-weight:700;border:1px solid var(--line);background:#102620;color:var(--text);padding:7px 11px;border-radius:999px;cursor:pointer}
+  .chip:hover{background:#19332A}.chip.gold{border-color:var(--gold);color:var(--gold)}
+
+  /* ---- bracket scroller ---- */
+  .scroll{border:1px solid var(--line);border-radius:18px;position:relative;overflow:auto;max-height:78vh;
+    background:radial-gradient(900px 460px at 50% -8%, #1430251a 0%, transparent 60%),linear-gradient(180deg,#0C1F19,#0B1C16)}
+  .scroll::-webkit-scrollbar{height:12px;width:12px}
+  .scroll::-webkit-scrollbar-thumb{background:#2B4C40;border-radius:9px;border:3px solid transparent;background-clip:content-box}
+  .canvas{position:relative}
+  svg.links{position:absolute;inset:0;pointer-events:none;z-index:1}
+  .lbl{position:absolute;z-index:2;width:var(--CARDW);text-align:center}
+  .lbl .rname{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text)}
+  .lbl .rname .pip{display:inline-block;width:7px;height:7px;background:var(--accent);border-radius:2px;margin-right:6px;transform:translateY(-1px)}
+  .lbl .rdate{font-size:10px;letter-spacing:.05em;color:var(--muted2);margin-top:3px;font-weight:600}
+
+  .match{position:absolute;z-index:2;width:var(--CARDW);background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 2px 0 rgba(0,0,0,.22)}
+  .meta{position:absolute;z-index:2;font-size:10px;letter-spacing:.04em;color:var(--muted2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+  .ptbadge{position:absolute;right:-9px;top:-10px;z-index:4;font-family:'Anton',sans-serif;font-size:12px;min-width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:7px;padding:0 5px;border:1px solid var(--line);background:#0E251E;color:var(--muted2)}
+  .ptbadge.p2{background:var(--gold);border-color:var(--gold);color:#231a00}
+  .ptbadge.p1{background:var(--accent);border-color:var(--accent);color:#22070F}
+
+  .team{display:flex;align-items:center;gap:7px;height:34px;padding:0 7px 0 9px;border-radius:11px}
+  .team:first-child{border-radius:11px 11px 0 0}
+  .team .flag{font-size:15px;width:20px;text-align:center;flex:none;line-height:1}
+  .team .tname{flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .team .seed{font-size:9px;font-weight:800;color:var(--muted2);background:#0D241D;border:1px solid #244338;border-radius:4px;padding:1px 4px;flex:none}
+  .divider{height:1px;background:var(--line)}
+  .team.win{background:var(--accent-dim);box-shadow:inset 4px 0 0 var(--accent)}
+  .team.win .tname{color:#fff;font-weight:700}.team.win .seed{color:#ffd5e4;border-color:rgba(255,67,133,.45)}
+  .team.lose .tname{color:var(--muted2);text-decoration:line-through;text-decoration-color:#3c5a4e}
+  .team.lose .flag{opacity:.5}.team.lose .seed{opacity:.5}
+  .team.empty .tname{color:var(--muted2);font-weight:500}.team.empty .flag{opacity:.28}
+
+  .stepper{display:flex;align-items:center;gap:3px;flex:none}
+  .sbtn{width:24px;height:24px;border-radius:8px;border:1px solid var(--line);background:#0E251E;color:var(--text);font-size:15px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .12s,border-color .12s}
+  .sbtn:hover{background:#1B362C;border-color:var(--accent)}.sbtn:active{transform:translateY(1px)}
+  .sbtn:disabled{opacity:.3;cursor:default}
+  .sval{min-width:20px;text-align:center;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+  .sval.null{color:var(--muted2);font-weight:600}
+  .team.win .sval{color:var(--accent)}.team.lose .sval{color:var(--muted2)}
+
+  .pens{display:flex;align-items:center;gap:6px;padding:6px 8px;border-top:1px dashed var(--line);background:#0E251E;border-radius:0 0 11px 11px}
+  .pens .plabel{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--accent);flex:none}
+  .pbtn{flex:1;min-width:0;font-family:inherit;font-size:10.5px;font-weight:700;color:var(--muted);background:#0B201A;border:1px solid var(--line);border-radius:7px;padding:4px 6px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pbtn:hover{border-color:var(--accent);color:var(--text)}
+  .pbtn.on{background:var(--accent);border-color:var(--accent);color:#22070F}
+
+  .champ{position:absolute;z-index:3;width:210px;border-radius:16px;text-align:center;padding:16px;border:1px solid var(--line);background:linear-gradient(180deg,#1A4034,#123026)}
+  .champ .cap{font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .champ .trophy{font-size:30px;margin:6px 0 2px;filter:grayscale(.5) opacity(.5)}
+  .champ .cflag{font-size:42px;line-height:1;margin:4px 0 6px;display:none}
+  .champ .cname{font-family:'Anton',sans-serif;font-size:23px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted2);line-height:1}
+  .champ .cwho{font-size:11px;color:var(--muted2);margin-top:8px;font-weight:600;min-height:14px}
+  .champ.set{border-color:var(--gold);background:linear-gradient(180deg,#26371E,#16291D);box-shadow:0 0 0 1px var(--gold),0 16px 44px -14px rgba(255,201,77,.5)}
+  .champ.set .trophy{display:none}.champ.set .cflag{display:block}.champ.set .cname{color:var(--gold)}.champ.set .cap{color:var(--gold)}
+  @media (prefers-reduced-motion:no-preference){.champ.set{animation:glow 2.8s ease-in-out infinite}
+    @keyframes glow{0%,100%{box-shadow:0 0 0 1px var(--gold),0 16px 40px -16px rgba(255,201,77,.45)}50%{box-shadow:0 0 0 1px var(--gold),0 16px 50px -10px rgba(255,201,77,.66)}}}
+  .thirdlbl{position:absolute;z-index:2;width:var(--CARDW);text-align:center;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
+  .thirdlbl b{color:var(--gold)}
+
+  /* ---- results list ---- */
+  .rgroup{margin:14px 0 4px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:9px}
+  .rgroup .ln{flex:1;height:1px;background:var(--line)}
+  .rrow{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:9px 11px;margin-bottom:8px}
+  .rtop{display:flex;align-items:center;gap:9px}
+  .rteam{flex:1;min-width:0;display:flex;align-items:center;gap:7px}
+  .rteam.a{justify-content:flex-end;text-align:right}
+  .rteam .flag{font-size:15px;flex:none}
+  .rteam .tn{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rteam.win .tn{color:#fff;font-weight:700}
+  .rteam.win .flag{filter:drop-shadow(0 0 6px rgba(255,67,133,.5))}
+  .rmid{display:flex;align-items:center;gap:6px;flex:none}
+  .rmid .dash{color:var(--muted2);font-weight:800}
+  .rsub{font-size:10.5px;color:var(--muted2);font-weight:600;margin-top:6px;text-align:center}
+  .rsub b{color:var(--muted)}
+  .rpens{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px}
+  .rpens .plabel{font-size:9px;font-weight:800;color:var(--accent)}
+  .rpens .pbtn{flex:none;max-width:42%}
+
+  /* ---- leaderboard ---- */
+  .lbhead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .lbhead h2{font-family:'Anton',sans-serif;font-weight:400;font-size:24px;letter-spacing:.02em;margin:0;text-transform:uppercase}
+  .lbhead .live{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .lbhead .live .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(61,220,145,.18)}
+  .lbhead .live.off .dot{background:#7a8f86;box-shadow:none}
+  .lbmeta{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .lbrow{display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:13px;border:1px solid var(--line);background:var(--card);margin-bottom:9px}
+  .lbrow.first{border-color:var(--gold);background:linear-gradient(180deg,#23341E,#173026)}
+  .lbrow.me{box-shadow:inset 0 0 0 1.5px var(--accent)}
+  .lbrank{font-family:'Anton',sans-serif;font-size:19px;width:26px;text-align:center;color:var(--muted2);flex:none}
+  .lbrow.first .lbrank{color:var(--gold)}
+  .lbname{flex:1;min-width:0;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lbname .you{font-size:10px;font-weight:800;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent);border-radius:999px;padding:1px 7px;margin-left:8px;vertical-align:middle}
+  .lbdetail{font-size:11px;color:var(--muted2);font-weight:600;text-align:right;flex:none;line-height:1.4}
+  .lbpts{font-family:'Anton',sans-serif;font-size:26px;line-height:1;flex:none;min-width:64px;text-align:right}
+  .lbrow.first .lbpts{color:var(--gold)}
+  .empty{border:1px dashed var(--line);border-radius:13px;padding:22px;text-align:center;color:var(--muted);font-size:13.5px}
+
+  .share{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px 15px;margin-top:16px}
+  .share h3{margin:0 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+  .share p{margin:0 0 10px;font-size:12.5px;color:var(--muted);line-height:1.5}
+  .share textarea{width:100%;height:54px;resize:vertical;background:#0B1F19;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+  .share .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+
+  footer.ft{color:var(--muted2);font-size:12px;line-height:1.6;margin-top:18px;padding:0 4px}
+  footer.ft b{color:var(--muted)}
+  @media (max-width:560px){.namebox input{min-width:150px}.scroll{max-height:72vh}.lbpts{font-size:22px;min-width:52px}}
+
+  /* ---- shared-sync additions ---- */
+  .setupbanner{margin:12px 0 0;border:1px solid var(--gold);background:var(--gold-dim);color:var(--text);border-radius:12px;padding:11px 14px;font-size:12.5px;line-height:1.5}
+  .setupbanner b{color:var(--gold)}
+  .keeperbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:10px;background:#102620;font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.45}
+  .keeperbar .kicon{font-size:16px;flex:none}
+  .keeperbar b{color:var(--text)}
+  .keeperbar.mine{border-color:var(--green);background:rgba(61,220,145,.08)}
+  .keeperbar.locked{border-color:var(--gold);background:var(--gold-dim)}
+  .keeperbar .kbtn{margin-left:auto;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;border-radius:9px;padding:7px 12px;border:1px solid var(--line);background:#163A2F;color:var(--text);white-space:nowrap}
+  .keeperbar .kbtn:hover{border-color:var(--accent)}
+  .lbmove{font-size:11px;font-weight:800;margin-left:7px;vertical-align:middle;font-variant-numeric:tabular-nums}
+  .lbmove.up{color:var(--green)}.lbmove.down{color:var(--accent)}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(18px);background:#163A2F;border:1px solid var(--gold);color:var(--text);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 14px 34px -12px rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:86vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media print{body{background:#fff}.toprow,.tabs,.vbar,.share,.keeperbar,.setupbanner,footer.ft{display:none}.scroll{max-height:none;overflow:visible;border:none}}
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate hidden">
+  <div class="gatecard">
+    <div class="gate-eyebrow">World Cup 2026 · Prediction Pool</div>
+    <h2 class="gate-title">Choose your username</h2>
+    <p class="gate-sub">This is the one and only thing that identifies you in the pool. Use the <b>same username on any device</b> to keep your picks — and pick something unique so friends can tell who's who.</p>
+    <input id="gateInput" type="text" maxlength="28" placeholder="e.g. gerges" autocomplete="off" spellcheck="false">
+    <div id="gateMsg" class="gate-msg"></div>
+    <button id="gateBtn" class="gate-btn" type="button">Enter the pool</button>
+    <p class="gate-foot">Returning? Enter the same username to pick up exactly where you left off.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hd">
+    <div class="hosts"><span>Canada</span><span class="fl">🇨🇦</span><span>·</span><span>Mexico</span><span class="fl">🇲🇽</span><span>·</span><span>United States</span><span class="fl">🇺🇸</span></div>
+    <span class="eyebrow">Prediction Pool · Live Leaderboard</span>
+    <h1 class="title">World Cup <span class="yr">2026</span></h1>
+    <p class="sub">Predict every knockout scoreline, then enter the real results as games finish. Everyone's points update live so you always know who's beating who.</p>
+
+    <div class="toprow">
+      <div class="namebox">
+        <label>Your username</label>
+        <button id="changeName" class="idchip" type="button"><span id="whoName">—</span><span class="idedit">Change</span></button>
+      </div>
+      <div class="sync off" id="sync"><span class="dot"></span><span id="syncTxt">Offline</span></div>
+    </div>
+
+    <div class="scorerule">
+      <span style="font-weight:800;color:var(--text)">Scoring</span>
+      <span class="tag"><span class="pts two">2</span> exact score</span>
+      <span class="tag"><span class="pts one">1</span> right team through</span>
+      <span class="tag" style="color:var(--muted2)">0 otherwise</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-view="bracket">🗂️ My picks</button>
+      <button class="tab" data-view="results">✅ Match results <span class="n" id="resN">0</span></button>
+      <button class="tab" data-view="board">🏆 Leaderboard <span class="n" id="boardN">1</span></button>
+    </div>
+  </header>
+
+  <div id="setupBanner" class="setupbanner hidden"></div>
+
+  <!-- BRACKET VIEW -->
+  <div class="view" id="view-bracket">
+    <div class="vbar">
+      <button class="btn" id="surprise">🎲 Surprise me</button>
+      <button class="btn ghost" id="reset">Reset my picks</button>
+      <button class="btn ghost" id="print">Print</button>
+      <span class="key"><span class="sw">−<span style="opacity:.4">+</span></span> set score</span>
+      <span class="key"><span class="sw pk">PK</span> tie → penalties</span>
+      <div class="navchips">
+        <button class="chip" data-nav="left">◀ Left</button>
+        <button class="chip gold" data-nav="final">🏆 Final</button>
+        <button class="chip" data-nav="right">Right ▶</button>
+      </div>
+    </div>
+    <div class="scroll" id="scroll"><div class="canvas" id="canvas"></div></div>
+  </div>
+
+  <!-- RESULTS VIEW -->
+  <div class="view hidden" id="view-results">
+    <div id="keeperBar" class="keeperbar hidden"></div>
+    <div class="vbar">
+      <p class="note" style="flex:1 1 260px"><b>Enter the real scores</b> as each game finishes — winners advance and unlock the next round. Shared with everyone in your pool.</p>
+      <button class="btn ghost" id="demoResults">🎲 Random results (demo)</button>
+      <button class="btn ghost" id="clearResults">Clear results</button>
+    </div>
+    <div id="resultsList"></div>
+  </div>
+
+  <!-- LEADERBOARD VIEW -->
+  <div class="view hidden" id="view-board">
+    <div class="lbhead">
+      <h2>Leaderboard</h2>
+      <span class="live off" id="liveBadge"><span class="dot"></span><span id="liveTxt">Local</span></span>
+    </div>
+    <div class="lbmeta" id="lbMeta"></div>
+    <div id="boardList"></div>
+
+    <div class="share">
+      <h3>Add friends to the pool</h3>
+      <p id="shareNote">Share this artifact with friends and everyone's picks appear here automatically. No sync? Send each other the code below instead.</p>
+      <textarea id="exportCode" readonly placeholder="Your code appears here"></textarea>
+      <div class="row">
+        <button class="btn" id="copyCode">Copy my code</button>
+      </div>
+      <textarea id="importCode" placeholder="Paste a friend's code here to add them"></textarea>
+      <div class="row">
+        <button class="btn" id="addFriend">Add friend from code</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ft">
+    Round of 32 matchups, dates and host cities are confirmed; later-round dates are scheduled windows. Picks and results are stored as plain text — <b>anyone you share this with can see names, picks and scores.</b>
+  </footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Firebase Realtime Database (free, loads from Google's CDN) — powers live sync. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   ⚽  SHARED LEADERBOARD SETUP   —   do this once, ~5 minutes, free
+   ────────────────────────────────────────────────────────────────────────
+   Everyone's picks and the live match results sync through a free Firebase
+   Realtime Database. Set it up once, then just send friends this file —
+   they're in the pool automatically, no accounts, no copy-pasting codes.
+
+   1. Go to  https://console.firebase.google.com  →  "Add project".
+      Name it anything (e.g. "wc2026-pool"). You can skip Google Analytics.
+   2. Left menu →  Build ▸ Realtime Database ▸ "Create Database".
+      Pick a location, then choose  "Start in test mode"  →  Enable.
+   3. Top-left ⚙ gear ▸ Project settings ▸ scroll to "Your apps" ▸ click the
+      </>  (Web) icon ▸ register an app (any nickname, no Hosting needed).
+   4. Firebase shows a  "const firebaseConfig = { … }"  block. Copy its values
+      into FIREBASE_CONFIG below, replacing every PASTE_… placeholder.
+      Make sure "databaseURL" is present — if it's missing, grab it from the
+      Realtime Database page (looks like https://xxxx-rtdb.firebaseio.com).
+   5. Save this file and open it. The badge up top should turn green and read
+      "Live sync on". Send the SAME file to friends — done.
+
+   • Separate pools (e.g. family vs. coworkers)? Give each group a different
+     POOL_ID below — only matching POOL_IDs share a leaderboard.
+   • "Test mode" opens read/write for ~30 days. To keep it open afterward, set
+     these Realtime Database rules (Rules tab):
+         { "rules": { ".read": true, ".write": true } }
+     Anyone with this file can read/write the pool, so don't store secrets.
+   • Haven't set this up yet? The app still works on your own device, and
+     friends can swap "codes" by hand on the Leaderboard tab as a fallback.
+   ════════════════════════════════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDuJDabIm75bn0-0m-9YZs1Tjh45mLeFtM",
+  authDomain:        "wc2026-pool-c5183.firebaseapp.com",
+  databaseURL:       "https://wc2026-pool-c5183-default-rtdb.firebaseio.com",
+  projectId:         "wc2026-pool-c5183",
+  storageBucket:     "wc2026-pool-c5183.firebasestorage.app",
+  messagingSenderId: "199507884131",
+  appId:             "1:199507884131:web:e880fa7b61e1c2611b6056"
+};
+const POOL_ID = "main";   // friends sharing one leaderboard must use the same value (letters/numbers/-_)
+
+/* =========================================================
+   DATA
+========================================================= */
+const t=(id,name,flag,seed)=>({id,name,flag,seed});
+const L32=[
+ {id:'74',a:t('GER','Germany','🇩🇪','E1'),b:t('PAR','Paraguay','🇵🇾','D3'),date:'Jun 29',city:'Boston'},
+ {id:'77',a:t('FRA','France','🇫🇷','I1'),b:t('SWE','Sweden','🇸🇪','F3'),date:'Jun 30',city:'New York'},
+ {id:'73',a:t('RSA','South Africa','🇿🇦','A2'),b:t('CAN','Canada','🇨🇦','B2'),date:'Jun 28',city:'Los Angeles'},
+ {id:'75',a:t('NED','Netherlands','🇳🇱','F1'),b:t('MAR','Morocco','🇲🇦','C2'),date:'Jun 29',city:'Monterrey'},
+ {id:'83',a:t('POR','Portugal','🇵🇹','K2'),b:t('CRO','Croatia','🇭🇷','L2'),date:'Jul 2',city:'Toronto'},
+ {id:'84',a:t('ESP','Spain','🇪🇸','H1'),b:t('AUT','Austria','🇦🇹','J2'),date:'Jul 2',city:'Los Angeles'},
+ {id:'81',a:t('USA','United States','🇺🇸','D1'),b:t('BIH','Bosnia','🇧🇦','B3'),date:'Jul 1',city:'San Francisco'},
+ {id:'82',a:t('BEL','Belgium','🇧🇪','G1'),b:t('SEN','Senegal','🇸🇳','I3'),date:'Jul 1',city:'Seattle'},
+];
+const L16=[{id:'89',fa:'74',fb:'77'},{id:'90',fa:'73',fb:'75'},{id:'93',fa:'83',fb:'84'},{id:'94',fa:'81',fb:'82'}];
+const LQF=[{id:'97',fa:'89',fb:'90'},{id:'98',fa:'93',fb:'94'}];
+const LSF=[{id:'101',fa:'97',fb:'98'}];
+const R32=[
+ {id:'76',a:t('BRA','Brazil','🇧🇷','C1'),b:t('JPN','Japan','🇯🇵','F2'),date:'Jun 29',city:'Houston'},
+ {id:'78',a:t('CIV','Ivory Coast','🇨🇮','E2'),b:t('NOR','Norway','🇳🇴','I2'),date:'Jun 30',city:'Dallas'},
+ {id:'79',a:t('MEX','Mexico','🇲🇽','A1'),b:t('ECU','Ecuador','🇪🇨','E3'),date:'Jun 30',city:'Mexico City'},
+ {id:'80',a:t('ENG','England','🏴󠁧󠁢󠁥󠁮󠁧󠁿','L1'),b:t('COD','DR Congo','🇨🇩','K3'),date:'Jul 1',city:'Atlanta'},
+ {id:'86',a:t('ARG','Argentina','🇦🇷','J1'),b:t('CPV','Cabo Verde','🇨🇻','H2'),date:'Jul 3',city:'Miami'},
+ {id:'88',a:t('AUS','Australia','🇦🇺','D2'),b:t('EGY','Egypt','🇪🇬','G2'),date:'Jul 3',city:'Dallas'},
+ {id:'85',a:t('SUI','Switzerland','🇨🇭','B1'),b:t('ALG','Algeria','🇩🇿','J3'),date:'Jul 2',city:'Vancouver'},
+ {id:'87',a:t('COL','Colombia','🇨🇴','K1'),b:t('GHA','Ghana','🇬🇭','L3'),date:'Jul 3',city:'Kansas City'},
+];
+const R16=[{id:'91',fa:'76',fb:'78'},{id:'92',fa:'79',fb:'80'},{id:'95',fa:'86',fb:'88'},{id:'96',fa:'85',fb:'87'}];
+const RQF=[{id:'99',fa:'91',fb:'92'},{id:'100',fa:'95',fb:'96'}];
+const RSF=[{id:'102',fa:'99',fb:'100'}];
+const FINAL={id:'104',fa:'101',fb:'102'};
+const THIRD={id:'103',fa:'101',fb:'102'};
+
+const SIDE={left:[L32,L16,LQF,LSF],right:[R32,R16,RQF,RSF]};
+const ROUND_GROUPS=[[...L32,...R32],[...L16,...R16],[...LQF,...RQF],[...LSF,...RSF],[FINAL]];
+const ROUND_NAMES=['Round of 32','Round of 16','Quarter-finals','Semi-finals','Final'];
+const ROUND_DATES=['Jun 28 – Jul 3','Jul 4 – 7','Jul 9 – 11','Jul 14 – 15','Jul 19'];
+const META={};[...L32,...R32].forEach(m=>META[m.id]=m.date+' · '+m.city);
+const MAIN_LIST=ROUND_GROUPS.flat();          // 31 matches
+const MAIN_IDS=new Set(MAIN_LIST.map(m=>m.id));
+
+/* =========================================================
+   ENGINE (generic over a {scores,pens} state)
+========================================================= */
+function winnerIdFor(state,tm,id){
+  const pair=tm[id]; if(!pair||!pair[0]||!pair[1]) return null;
+  const v=(state.scores||{})[id]||[null,null]; const a=v[0],b=v[1];
+  if(a==null||b==null) return null;
+  if(a>b) return pair[0].id; if(b>a) return pair[1].id;
+  const p=(state.pens||{})[id]; return (p&&(p===pair[0].id||p===pair[1].id))?p:null;
+}
+function resolveState(state,mutate){
+  const sc=state.scores||(state.scores={}), pn=state.pens||(state.pens={});
+  const tm={};
+  ROUND_GROUPS[0].forEach(m=>tm[m.id]=[m.a,m.b]);
+  const wT=id=>{const pair=tm[id];const w=winnerIdFor(state,tm,id);return w?pair.find(x=>x.id===w):null;};
+  const lT=id=>{const pair=tm[id];const w=winnerIdFor(state,tm,id);if(!w)return null;return pair[0].id===w?pair[1]:pair[0];};
+  const stamp=mutate?(state._last||(state._last={})):null;
+  const apply=(m,pair)=>{
+    if(mutate){
+      const ids=pair.map(x=>x?x.id:null), old=stamp[m.id];
+      const had=(sc[m.id]&&(sc[m.id][0]!=null||sc[m.id][1]!=null))||pn[m.id];
+      if(old&&(old[0]!==ids[0]||old[1]!==ids[1])&&had){delete sc[m.id];delete pn[m.id];}
+      stamp[m.id]=ids;
+    }
+    tm[m.id]=pair;
+  };
+  for(let g=1;g<ROUND_GROUPS.length;g++) ROUND_GROUPS[g].forEach(m=>apply(m,[wT(m.fa),wT(m.fb)]));
+  apply(THIRD,[lT('101'),lT('102')]);
+  return tm;
+}
+function isTie(state,tm,id){const p=tm[id];if(!p||!p[0]||!p[1])return false;const v=(state.scores||{})[id]||[null,null];return v[0]!=null&&v[1]!=null&&v[0]===v[1];}
+
+/* scoring one prediction position vs the actual result */
+function pointsFor(picks,picksTM,id){
+  const av=(actual.scores||{})[id]; if(!av||av[0]==null||av[1]==null) return null;
+  const aW=winnerIdFor(actual,actualTM,id); if(aW==null) return null; // tie w/o pens = not scorable yet
+  const pv=(picks.scores||{})[id];
+  if(pv && pv[0]===av[0] && pv[1]===av[1]) return 2;
+  const pW=winnerIdFor(picks,picksTM,id);
+  if(pW!=null && pW===aW) return 1;
+  return 0;
+}
+
+/* =========================================================
+   STATE
+========================================================= */
+let pred={scores:{},pens:{}};
+let actual={scores:{},pens:{},updatedAt:0};
+let entries={};                 // id -> {id,name,picks:{scores,pens},updatedAt}
+let imports={};                 // locally added friends (persisted personally)
+let me={id:null,name:''};
+let predTM={}, actualTM={};
+let view='bracket';
+let lastSync=0;
+let keeper=null;            // {uid,name,ts} — who enters the real results (shared)
+let prevRanks={};           // leaderboard id -> last rank, for ▲▼ movement
+let RES_LOCK=false;         // results read-only here (someone else is keeping score)
+
+/* =========================================================
+   SYNC  —  Firebase real-time  ▸  Claude store  ▸  local-only
+   "me" and manually-added friends live in this browser (localStorage).
+   entries / results / keeper are the SHARED pool.
+========================================================= */
+const genId=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const normPicks=p=>({scores:(p&&p.scores)||{},pens:(p&&p.pens)||{}});
+
+const _cfgFilled=!!(FIREBASE_CONFIG&&FIREBASE_CONFIG.databaseURL&&FIREBASE_CONFIG.apiKey&&!JSON.stringify(FIREBASE_CONFIG).includes('PASTE_'));
+const CLAUDE_STORE=(typeof window!=='undefined'&&window.storage)?window.storage:null;
+
+/* per-device identity + manually pasted friends */
+const LS=(()=>{try{return window.localStorage;}catch(e){return null;}})();
+function lsGet(k){try{return LS?JSON.parse(LS.getItem(k)):null;}catch(e){return null;}}
+function lsSet(k,v){try{LS&&LS.setItem(k,JSON.stringify(v));}catch(e){}}
+function saveMe(){lsSet('wc26_me',{id:me.id,name:me.name});}
+function saveImports(){lsSet('wc26_imports',Object.values(imports));}
+function myEntry(){return {id:me.id,name:me.name||'',picks:{scores:pred.scores,pens:pred.pens},updatedAt:Date.now()};}
+function savePred(){lsSet('wc26_pred',{scores:pred.scores,pens:pred.pens});}
+/* a player "exists" in the pool only once they have a name or at least one pick — avoids ghost rows */
+function hasPresence(){return !!(me.name&&me.name.trim()) || Object.keys(pred.scores).length>0 || Object.keys(pred.pens).length>0;}
+function entryHasContent(e){return !!(e && ((e.name&&String(e.name).trim()) || (e.picks&&((e.picks.scores&&Object.keys(e.picks.scores).length)||(e.picks.pens&&Object.keys(e.picks.pens).length)))));}
+/* the player's USERNAME is the one and only identity; slug it into a stable id */
+function slugId(name){const s=String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'');return s?('u_'+s.slice(0,40)):'';}
+let lastRemoteRaw={};       // latest entries snapshot (to load your bracket when you sign in with your username)
+function refreshWhoChip(){const el=document.getElementById('whoName');if(el)el.textContent=me.name||'—';}
+
+const handlers={entries:()=>{},results:()=>{},keeper:()=>{}};
+let fbRoot=null;
+const SYNC={
+  mode:'local',
+  on(k,fn){handlers[k]=fn;},
+  start(){
+    if(_cfgFilled && typeof firebase!=='undefined'){
+      try{
+        firebase.initializeApp(FIREBASE_CONFIG);
+        fbRoot=firebase.database().ref('pools/'+POOL_ID);
+        this.mode='firebase';
+        fbRoot.child('entries').on('value',s=>{
+          const raw=s.val()||{},out={};
+          Object.keys(raw).forEach(k=>{const e=raw[k];if(!e||!e.id)return;let picks={};try{picks=e.p?JSON.parse(e.p):(e.picks||{});}catch(_){}out[e.id]={id:e.id,name:e.name||'',picks:normPicks(picks),updatedAt:e.u||e.updatedAt||0};});
+          handlers.entries(out);
+        });
+        fbRoot.child('results').on('value',s=>{
+          const v=s.val();if(!v){handlers.results(null);return;}
+          let d={};try{d=v.p?JSON.parse(v.p):{};}catch(_){}
+          handlers.results({scores:d.scores||{},pens:d.pens||{},updatedAt:v.u||0,by:v.by||''});
+        });
+        fbRoot.child('keeper').on('value',s=>handlers.keeper(s.val()||null));
+        return;
+      }catch(e){console.warn('[sync] Firebase init failed:',e);fbRoot=null;}
+    }
+    if(CLAUDE_STORE){this.mode='claude';return;}
+    this.mode='local';
+  },
+  async putEntry(en){
+    if(this.mode==='firebase'){try{await fbRoot.child('entries/'+en.id).set({id:en.id,name:en.name||'',p:JSON.stringify(normPicks(en.picks)),u:en.updatedAt||0});}catch(e){}}
+    else if(this.mode==='claude'){try{await CLAUDE_STORE.set('entry:'+en.id,JSON.stringify(en),true);}catch(e){}}
+  },
+  async removeEntry(id){
+    if(this.mode==='firebase'){try{await fbRoot.child('entries/'+id).remove();}catch(e){}}
+    else if(this.mode==='claude'){try{await CLAUDE_STORE.set('entry:'+id,JSON.stringify(null),true);}catch(e){}}
+  },
+  async putResults(res){
+    const payload={scores:res.scores||{},pens:res.pens||{}};
+    if(this.mode==='firebase'){try{await fbRoot.child('results').set({p:JSON.stringify(payload),u:res.updatedAt||0,by:res.by||''});}catch(e){}}
+    else if(this.mode==='claude'){try{await CLAUDE_STORE.set('results',JSON.stringify({...payload,updatedAt:res.updatedAt||0,by:res.by||''}),true);}catch(e){}}
+  },
+  async putKeeper(k){
+    if(this.mode==='firebase'){try{await fbRoot.child('keeper').set(k);}catch(e){}}
+    else if(this.mode==='claude'){try{await CLAUDE_STORE.set('keeper',JSON.stringify(k),true);}catch(e){}}
+  },
+  async pollClaude(){
+    if(this.mode!=='claude')return;
+    const ents={};
+    try{const l=await CLAUDE_STORE.list('entry:',true);if(l&&l.keys)for(const k of l.keys){const r=await CLAUDE_STORE.get(k,true);if(r&&r.value){const e=JSON.parse(r.value);if(e&&e.id)ents[e.id]={...e,picks:normPicks(e.picks)};}}}catch(e){}
+    handlers.entries(ents);
+    try{const r=await CLAUDE_STORE.get('results',true);handlers.results(r&&r.value?JSON.parse(r.value):null);}catch(e){}
+    try{const r=await CLAUDE_STORE.get('keeper',true);handlers.keeper(r&&r.value?JSON.parse(r.value):null);}catch(e){}
+  }
+};
+
+/* debounced shared writes */
+let saveTimers={};
+function schedule(kind){clearTimeout(saveTimers[kind]);saveTimers[kind]=setTimeout(()=>{
+  if(kind==='entry'){if(hasPresence())SYNC.putEntry(myEntry());else SYNC.removeEntry(me.id);}
+  else if(kind==='results')SYNC.putResults({scores:actual.scores,pens:actual.pens,updatedAt:actual.updatedAt,by:(keeper&&keeper.name)||me.name||''});
+},400);}
+
+/* =========================================================
+   RESULTS KEEPER  (only the keeper edits the live scores)
+========================================================= */
+function sharedSync(){return SYNC.mode==='firebase'||SYNC.mode==='claude';}
+function keeperIsMe(){return !!(keeper&&keeper.uid===me.id);}
+function othersKeeping(){return !!(keeper&&keeper.uid&&keeper.uid!==me.id);}
+function claimKeeper(){keeper={uid:me.id,name:me.name||'A friend',ts:Date.now()};SYNC.putKeeper(keeper);updateKeeperUI();if(view==='results')renderResults();}
+function stepDownKeeper(){keeper=null;SYNC.putKeeper(null);updateKeeperUI();if(view==='results')renderResults();}
+function canEditResults(){
+  if(!sharedSync())return true;          // local-only: edit freely
+  if(othersKeeping())return false;       // someone else holds the pen
+  if(!keeper)claimKeeper();              // nobody yet → you become keeper
+  return true;
+}
+function updateKeeperUI(){
+  const bar=document.getElementById('keeperBar');if(!bar)return;
+  RES_LOCK=othersKeeping();
+  if(!sharedSync()){bar.classList.add('hidden');return;}
+  bar.classList.remove('hidden','mine','locked');
+  if(keeperIsMe()){
+    bar.classList.add('mine');
+    bar.innerHTML=`<span class="kicon">✅</span><span>You’re the <b>results keeper</b> — enter each real score as games finish and everyone updates live.</span><button class="kbtn" data-kact="step">Step down</button>`;
+  }else if(othersKeeping()){
+    bar.classList.add('locked');
+    bar.innerHTML=`<span class="kicon">🔒</span><span><b>${esc(keeper.name||'A friend')}</b> is keeping score — results are read-only for you, but the table still updates live.</span><button class="kbtn" data-kact="take">Take over</button>`;
+  }else{
+    bar.innerHTML=`<span class="kicon">📋</span><span><b>No results keeper yet.</b> Whoever’s watching the games should keep score — just start entering results, or claim it now.</span><button class="kbtn" data-kact="claim">I’ll keep score</button>`;
+  }
+}
+
+/* tiny toast */
+let toastT=null;
+function toast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);}
+
+/* =========================================================
+   MUTATIONS
+========================================================= */
+function stepState(state,id,slot,delta){
+  if(!state.scores[id])state.scores[id]=[null,null];
+  const cur=state.scores[id][slot];
+  let nv;
+  if(delta>0) nv=(cur==null)?0:Math.min(cur+1,19);
+  else nv=(cur==null)?null:(cur-1<0?null:cur-1);
+  state.scores[id][slot]=nv;
+  if(state.scores[id][0]==null&&state.scores[id][1]==null)delete state.scores[id];
+}
+function setPenState(state,id,team){state.pens[id]=(state.pens[id]===team?undefined:team);if(state.pens[id]==null)delete state.pens[id];}
+
+function afterPred(){predTM=resolveState(pred,true);entries[me.id]={id:me.id,name:me.name,picks:{scores:pred.scores,pens:pred.pens},updatedAt:Date.now()};savePred();schedule('entry');renderActive();updateCounts();}
+function afterActual(){actual.updatedAt=Date.now();actualTM=resolveState(actual,true);schedule('results');renderActive();updateCounts();}
+
+const rnd=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
+function surprise(){
+  // fill round by round so winners populate the next round
+  ROUND_GROUPS.forEach(grp=>{
+    predTM=resolveState(pred,true);
+    grp.forEach(m=>{const p=predTM[m.id];if(p&&p[0]&&p[1]&&winnerIdFor(pred,predTM,m.id)==null){const a=rnd(0,3),b=rnd(0,3);pred.scores[m.id]=[a,b];if(a===b)pred.pens[m.id]=(Math.random()<.5?p[0]:p[1]).id;}});
+  });
+  predTM=resolveState(pred,true);
+  const tp=predTM['103'];if(tp&&tp[0]&&tp[1]&&winnerIdFor(pred,predTM,'103')==null){const a=rnd(0,3),b=rnd(0,3);pred.scores['103']=[a,b];if(a===b)pred.pens['103']=(Math.random()<.5?tp[0]:tp[1]).id;}
+  afterPred();
+}
+function fillResultsRandom(){
+  if(!canEditResults()){toast(`${(keeper&&keeper.name)||'Someone'} is keeping score`);return;}
+  ROUND_GROUPS.forEach(grp=>{
+    actualTM=resolveState(actual,true);
+    grp.forEach(m=>{const p=actualTM[m.id];if(p&&p[0]&&p[1]&&winnerIdFor(actual,actualTM,m.id)==null){const a=rnd(0,3),b=rnd(0,3);actual.scores[m.id]=[a,b];if(a===b)actual.pens[m.id]=(Math.random()<.5?p[0]:p[1]).id;}});
+  });
+  afterActual();
+}
+function reset(){if(!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length)return;
+  if(confirm('Clear all of YOUR picks? (Results and other players are untouched.)')){pred={scores:{},pens:{}};afterPred();}}
+function clearResults(){
+  if(othersKeeping()){toast(`${keeper.name||'Someone'} is keeping score`);return;}
+  if(!Object.keys(actual.scores).length&&!Object.keys(actual.pens).length)return;
+  if(confirm('Clear ALL match results for everyone in the pool?')){actual={scores:{},pens:{},updatedAt:Date.now()};afterActual();}}
+
+/* =========================================================
+   RENDER — shared bits
+========================================================= */
+function stepperHTML(stateName,id,slot,val,disabled){
+  const v=(val==null)?'–':val, nc='sval'+(val==null?' null':''), d=disabled?'disabled':'';
+  return `<span class="stepper">`
+    +`<button class="sbtn" ${d} data-act="dec" data-st="${stateName}" data-m="${id}" data-s="${slot}" aria-label="fewer goals">−</button>`
+    +`<span class="${nc}">${v}</span>`
+    +`<button class="sbtn" ${d} data-act="inc" data-st="${stateName}" data-m="${id}" data-s="${slot}" aria-label="more goals">+</button></span>`;
+}
+function pensFooterHTML(stateName,state,id,pair,cls){
+  const sel=(state.pens||{})[id];
+  const b=team=>`<button class="pbtn ${sel===team.id?'on':''}" data-act="pen" data-st="${stateName}" data-m="${id}" data-team="${team.id}" title="${team.name} win on penalties">${team.flag} ${team.name}</button>`;
+  return `<div class="${cls}"><span class="plabel">PK</span>${b(pair[0])}${b(pair[1])}</div>`;
+}
+
+/* =========================================================
+   RENDER — bracket (predictions)
+========================================================= */
+const LEFT=14,STEP=240,CARDW=200,TOP=58,BAND0=112,NORMAL_H=69;
+const X_CENTER=LEFT+4*STEP, FINAL_CY=TOP+(BAND0*8)/2;
+const CHAMP_CY=FINAL_CY+132,CHAMP_W=210,CHAMP_H=104,THIRD_CY=CHAMP_CY+128;
+const CANVAS_W=X_CENTER+4*STEP+CARDW+16, CANVAS_H=TOP+BAND0*8+30;
+const countAt=r=>8/Math.pow(2,r),bandAt=r=>BAND0*Math.pow(2,r);
+const cyAt=(r,i)=>TOP+bandAt(r)*(i+0.5),xLeft=r=>LEFT+r*STEP,xRight=r=>X_CENTER+(4-r)*STEP;
+const canvas=document.getElementById('canvas');
+
+function bTeamRow(id,slot,team,state){
+  if(!team) return `<div class="team empty"><span class="flag">·</span><span class="tname">—</span>${stepperHTML('pred',id,slot,null,true)}</div>`;
+  const sc=(pred.scores[id]||[null,null])[slot];
+  return `<div class="team ${state}"><span class="flag">${team.flag}</span>`
+    +`<span class="tname" title="${team.name}">${team.name}</span>`
+    +(team.seed?`<span class="seed">${team.seed}</span>`:'')
+    +stepperHTML('pred',id,slot,sc,false)+`</div>`;
+}
+function bMatch(id,x,cy,isR32){
+  const pair=predTM[id]||[null,null], w=winnerIdFor(pred,predTM,id), tied=isTie(pred,predTM,id), top=cy-NORMAL_H/2;
+  const st=s=>(!pair[s]||w==null)?'':(pair[s].id===w?'win':'lose');
+  let h='';
+  if(isR32) h+=`<div class="meta" style="left:${x}px;top:${top-16}px;width:${CARDW}px">${META[id]||''}</div>`;
+  let badge='';
+  if(MAIN_IDS.has(id)){const p=pointsFor(pred,predTM,id);if(p!=null)badge=`<div class="ptbadge ${p===2?'p2':p===1?'p1':''}">+${p}</div>`;}
+  h+=`<div class="match" style="left:${x}px;top:${top}px">`+badge
+    +bTeamRow(id,0,pair[0],st(0))+`<div class="divider"></div>`+bTeamRow(id,1,pair[1],st(1))
+    +(tied?pensFooterHTML('pred',pred,id,pair,'pens'):'')+`</div>`;
+  return h;
+}
+function colLabel(x,name,date){return `<div class="lbl" style="left:${x}px;top:14px"><div class="rname"><span class="pip"></span>${name}</div><div class="rdate">${date}</div></div>`;}
+function svgLine(x1,y1,x2,y2,c){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`;}
+function buildLinks(){
+  const A='#FF4385',S='#284A3E';const dec=id=>winnerIdFor(pred,predTM,id)!=null;
+  let s=`<svg class="links" width="${CANVAS_W}" height="${CANVAS_H}" viewBox="0 0 ${CANVAS_W} ${CANVAS_H}">`;
+  for(const side of ['left','right'])for(let r=1;r<=3;r++)for(let i=0;i<countAt(r);i++){
+    const lft=side==='left';
+    const y1=cyAt(r-1,2*i),y2=cyAt(r-1,2*i+1),yc=cyAt(r,i);
+    const fa=SIDE[side][r-1][2*i].id,fb=SIDE[side][r-1][2*i+1].id,me2=SIDE[side][r][i].id;
+    let fEdge,cEdge;
+    if(lft){fEdge=xLeft(r-1)+CARDW;cEdge=xLeft(r);}else{fEdge=xRight(r-1);cEdge=xRight(r)+CARDW;}
+    const mid=(fEdge+cEdge)/2;
+    s+=svgLine(fEdge,y1,mid,y1,dec(fa)?A:S)+svgLine(fEdge,y2,mid,y2,dec(fb)?A:S)+svgLine(mid,y1,mid,y2,S)+svgLine(mid,yc,cEdge,yc,dec(me2)?A:S);
+  }
+  s+=svgLine(xLeft(3)+CARDW,FINAL_CY,X_CENTER,FINAL_CY,dec('101')?A:S);
+  s+=svgLine(X_CENTER+CARDW,FINAL_CY,xRight(3),FINAL_CY,dec('102')?A:S);
+  const cx=X_CENTER+CARDW/2;
+  s+=svgLine(cx,FINAL_CY+NORMAL_H/2,cx,CHAMP_CY-CHAMP_H/2,dec('104')?A:S);
+  return s+`</svg>`;
+}
+function championBox(){
+  const pair=predTM['104'],w=winnerIdFor(pred,predTM,'104'),champ=w?pair.find(x=>x.id===w):null;
+  const top=CHAMP_CY-CHAMP_H/2,left=X_CENTER+CARDW/2-CHAMP_W/2,set=champ?' set':'';
+  const whoLine=champ?(me.name?me.name+'’s winner':'World champions'):'Win the final to be crowned';
+  return `<div class="champ${set}" style="left:${left}px;top:${top}px;width:${CHAMP_W}px"><div class="cap">Champions</div>`
+    +`<div class="trophy">🏆</div><div class="cflag">${champ?champ.flag:''}</div>`
+    +`<div class="cname">${champ?champ.name:'Champion'}</div><div class="cwho">${whoLine}</div></div>`;
+}
+function renderBracket(){
+  predTM=resolveState(pred,true);
+  let h=buildLinks();
+  for(let r=0;r<=3;r++)h+=colLabel(xLeft(r),ROUND_NAMES[r],ROUND_DATES[r]);
+  for(let r=0;r<=3;r++)h+=colLabel(xRight(r),ROUND_NAMES[r],ROUND_DATES[r]);
+  h+=colLabel(X_CENTER,'Final','Jul 19');
+  for(let r=0;r<=3;r++)for(let i=0;i<countAt(r);i++)h+=bMatch(SIDE.left[r][i].id,xLeft(r),cyAt(r,i),r===0);
+  for(let r=0;r<=3;r++)for(let i=0;i<countAt(r);i++)h+=bMatch(SIDE.right[r][i].id,xRight(r),cyAt(r,i),r===0);
+  h+=bMatch('104',X_CENTER,FINAL_CY,false);
+  h+=championBox();
+  const ttop=THIRD_CY-NORMAL_H/2;
+  h+=`<div class="thirdlbl" style="left:${X_CENTER}px;top:${ttop-16}px"><b>Third place</b> · bonus (not scored)</div>`;
+  h+=bMatch('103',X_CENTER,THIRD_CY,false);
+  canvas.style.width=CANVAS_W+'px';canvas.style.height=CANVAS_H+'px';canvas.innerHTML=h;
+}
+
+/* =========================================================
+   RENDER — results list (actual)
+========================================================= */
+function rRow(m){
+  const pair=actualTM[m.id]||[null,null];
+  const w=winnerIdFor(actual,actualTM,m.id), tied=isTie(actual,actualTM,m.id);
+  const a=pair[0],b=pair[1];
+  const sa=(actual.scores[m.id]||[null,null])[0], sb=(actual.scores[m.id]||[null,null])[1];
+  const known=a&&b;
+  const wa=w&&a&&a.id===w, wb=w&&b&&b.id===w;
+  const teamA=a?`<span class="flag">${a.flag}</span><span class="tn">${a.name}</span>`:`<span class="tn" style="color:var(--muted2)">${m.isR32?'TBD':'Winner '+m.fa}</span>`;
+  const teamB=b?`<span class="tn">${b.name}</span><span class="flag">${b.flag}</span>`:`<span class="tn" style="color:var(--muted2)">${m.isR32?'TBD':'Winner '+m.fb}</span>`;
+  const sub=m.isR32?`<div class="rsub">${META[m.id]||''}</div>`:'';
+  return `<div class="rrow">`
+    +`<div class="rtop">`
+      +`<div class="rteam a ${wa?'win':''}">${teamA}</div>`
+      +`<div class="rmid">${stepperHTML('actual',m.id,0,sa,!known||RES_LOCK)}<span class="dash">–</span>${stepperHTML('actual',m.id,1,sb,!known||RES_LOCK)}</div>`
+      +`<div class="rteam ${wb?'win':''}">${teamB}</div>`
+    +`</div>`+sub
+    +(tied?pensFooterHTML('actual',actual,m.id,pair,'rpens'):'')
+    +`</div>`;
+}
+function renderResults(){
+  actualTM=resolveState(actual,true);
+  updateKeeperUI();                       // refreshes the keeper bar + RES_LOCK
+  document.getElementById('demoResults').disabled=RES_LOCK;
+  document.getElementById('clearResults').disabled=RES_LOCK;
+  let h='';
+  ROUND_GROUPS.forEach((grp,gi)=>{
+    const rows=grp.map(m=>({...m,isR32:gi===0})).filter(m=>{const p=actualTM[m.id];return gi===0|| (p&&p[0]&&p[1]);});
+    if(!rows.length)return;
+    h+=`<div class="rgroup">${ROUND_NAMES[gi]}<span class="ln"></span></div>`;
+    rows.forEach(m=>h+=rRow(m));
+  });
+  document.getElementById('resultsList').innerHTML=h;
+}
+
+/* =========================================================
+   RENDER — leaderboard
+========================================================= */
+function allEntries(){const map={};Object.values(imports).forEach(e=>map[e.id]=e);Object.values(entries).forEach(e=>map[e.id]=e);return Object.values(map);}
+function computeBoard(){
+  return allEntries().map(e=>{
+    const tmP=resolveState({scores:(e.picks&&e.picks.scores)||{},pens:(e.picks&&e.picks.pens)||{}},false);
+    let pts=0,exact=0,team=0,scored=0;
+    MAIN_IDS.forEach(id=>{const p=pointsFor(e.picks,tmP,id);if(p==null)return;scored++;if(p===2){pts+=2;exact++;}else if(p===1){pts+=1;team++;}});
+    return {id:e.id,name:e.name||'(no name)',pts,exact,team,scored,me:e.id===me.id};
+  }).sort((x,y)=>y.pts-x.pts||y.exact-x.exact||x.name.localeCompare(y.name));
+}
+function matchesScored(){let n=0;MAIN_IDS.forEach(id=>{const av=actual.scores[id];if(av&&av[0]!=null&&av[1]!=null&&winnerIdFor(actual,actualTM,id)!=null)n++;});return n;}
+function renderBoard(){
+  actualTM=resolveState(actual,true);
+  const rows=computeBoard(), scored=matchesScored();
+  const meta=document.getElementById('lbMeta');
+  meta.innerHTML=`<b style="color:var(--text)">${rows.length}</b> player${rows.length===1?'':'s'} · <b style="color:var(--text)">${scored}</b> / 31 matches scored`
+    +(keeper&&keeper.uid?` · scores kept by <b style="color:var(--text)">${esc(keeper.name||'a friend')}${keeperIsMe()?' (you)':''}</b>`:'');
+  const list=document.getElementById('boardList');
+  if(rows.length<=1 && scored===0){
+    list.innerHTML=`<div class="empty">Add your name above, then make your picks.<br>Enter match results to start scoring — the table updates live.</div>`;
+  }else{
+    list.innerHTML=rows.map((r,i)=>{
+      const rank=i+1,first=rank===1&&r.pts>0,prev=prevRanks[r.id];
+      let mv='';
+      if(scored>0&&prev!=null&&prev!==rank){const up=prev>rank;mv=`<span class="lbmove ${up?'up':'down'}" title="moved ${up?'up':'down'} ${Math.abs(prev-rank)}">${up?'▲':'▼'}${Math.abs(prev-rank)}</span>`;}
+      return `<div class="lbrow ${first?'first':''} ${r.me?'me':''}">`
+        +`<div class="lbrank">${rank}</div>`
+        +`<div class="lbname">${esc(r.name)}${r.me?'<span class="you">YOU</span>':''}${mv}</div>`
+        +`<div class="lbdetail">${r.exact} exact · ${r.team} team<br>${r.scored} scored</div>`
+        +`<div class="lbpts">${r.pts}</div></div>`;
+    }).join('');
+  }
+  prevRanks={};rows.forEach((r,i)=>prevRanks[r.id]=i+1);
+  updateSyncBadge();
+}
+
+/* =========================================================
+   VIEW SWITCH + COUNTS
+========================================================= */
+function renderActive(){
+  if(view==='bracket')renderBracket();
+  else if(view==='results')renderResults();
+  else renderBoard();
+}
+function updateCounts(){
+  document.getElementById('resN').textContent=matchesScored();
+  document.getElementById('boardN').textContent=allEntries().length;
+}
+function setView(v){
+  view=v;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));
+  document.getElementById('view-bracket').classList.toggle('hidden',v!=='bracket');
+  document.getElementById('view-results').classList.toggle('hidden',v!=='results');
+  document.getElementById('view-board').classList.toggle('hidden',v!=='board');
+  renderActive();
+  if(v==='board')refreshExport();
+  if(v==='bracket')requestAnimationFrame(()=>{const sc=document.getElementById('scroll');sc.scrollLeft=Math.max(0,X_CENTER+CARDW/2-sc.clientWidth/2);});
+}
+
+/* =========================================================
+   EXPORT / IMPORT
+========================================================= */
+const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+const dec=s=>JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
+function refreshExport(){document.getElementById('exportCode').value=enc({name:me.name||'Me',picks:{scores:pred.scores,pens:pred.pens}});}
+function addFriend(){
+  const ta=document.getElementById('importCode');const v=ta.value.trim();if(!v)return;
+  try{const o=dec(v);if(!o||!o.picks)throw 0;const id='imp_'+genId();imports[id]={id,name:(o.name||'Friend').slice(0,28),picks:{scores:o.picks.scores||{},pens:o.picks.pens||{}},updatedAt:Date.now()};
+    saveImports();ta.value='';updateCounts();renderBoard();
+  }catch(e){alert('That code could not be read. Make sure you copied the whole thing.');}
+}
+
+/* =========================================================
+   INTERACTION
+========================================================= */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
+  const isActual=el.dataset.st==='actual';
+  if(isActual && othersKeeping()){toast(`${keeper.name||'Someone'} is keeping score`);return;}
+  if(isActual && !canEditResults())return;
+  const st=isActual?actual:pred, id=el.dataset.m, act=el.dataset.act;
+  if(act==='inc')stepState(st,id,+el.dataset.s,1);
+  else if(act==='dec')stepState(st,id,+el.dataset.s,-1);
+  else if(act==='pen')setPenState(st,id,el.dataset.team);
+  if(isActual)afterActual();else afterPred();
+});
+document.getElementById('keeperBar').addEventListener('click',e=>{
+  const b=e.target.closest('[data-kact]');if(!b)return;
+  if(b.dataset.kact==='step')stepDownKeeper();else claimKeeper();
+});
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>setView(t.dataset.view)));
+document.getElementById('changeName').addEventListener('click',showGate);
+document.getElementById('gateBtn').addEventListener('click',submitGate);
+document.getElementById('gateInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitGate();}});
+document.getElementById('gateInput').addEventListener('input',()=>{document.getElementById('gateMsg').textContent='';});
+document.getElementById('surprise').addEventListener('click',surprise);
+document.getElementById('reset').addEventListener('click',reset);
+document.getElementById('print').addEventListener('click',()=>window.print());
+document.getElementById('demoResults').addEventListener('click',fillResultsRandom);
+document.getElementById('clearResults').addEventListener('click',clearResults);
+document.getElementById('copyCode').addEventListener('click',()=>{refreshExport();const ta=document.getElementById('exportCode');ta.select();try{document.execCommand('copy');}catch(e){}const b=document.getElementById('copyCode');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy my code',1400);});
+document.getElementById('addFriend').addEventListener('click',addFriend);
+
+const scroller=document.getElementById('scroll');
+document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{
+  const w=scroller.clientWidth,where=b.dataset.nav;let x=0;
+  if(where==='final')x=X_CENTER+CARDW/2-w/2;else if(where==='right')x=CANVAS_W;
+  scroller.scrollTo({left:Math.max(0,x),behavior:'smooth'});
+}));
+
+/* =========================================================
+   INIT + LIVE POLL
+========================================================= */
+function timeStr(t){return new Date(t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});}
+function updateSyncBadge(){
+  const on=SYNC.mode!=='local';
+  const s=document.getElementById('sync'),txt=document.getElementById('syncTxt');
+  s.classList.toggle('off',!on);
+  if(SYNC.mode==='firebase')txt.textContent=lastSync?('Live · synced '+timeStr(lastSync)):'Live sync on';
+  else if(SYNC.mode==='claude')txt.textContent=lastSync?('Synced '+timeStr(lastSync)):'Live sync on';
+  else txt.textContent='Sync off';
+  const lb=document.getElementById('liveBadge'),lt=document.getElementById('liveTxt');
+  if(lb){lb.classList.toggle('off',!on);lt.textContent=on?(lastSync?'Live · synced':'Live'):'Local only';}
+
+  const note=document.getElementById('shareNote');
+  if(note)note.textContent=on
+    ? 'Anyone you send this file to joins the pool automatically — picks and live results sync for everyone, no code needed. (The codes below still work as an offline backup.)'
+    : 'Shared sync isn’t on. Add your free Firebase keys at the top of the file to sync with friends — or paste each other’s codes below to build the table by hand.';
+
+  const banner=document.getElementById('setupBanner');
+  if(banner){
+    if(SYNC.mode!=='local')banner.classList.add('hidden');
+    else if(!_cfgFilled){banner.classList.remove('hidden');banner.innerHTML='⚙️ <b>Shared sync isn’t set up yet.</b> Open this file in a text editor and follow the 5-minute SETUP steps at the top of its &lt;script&gt; — paste your free Firebase keys to sync everyone live. Until then it works on this device only.';}
+    else{banner.classList.remove('hidden');banner.innerHTML='⚠️ <b>Can’t reach the sync server.</b> Your Firebase keys are set, but the database isn’t responding — check your internet, that <code>databaseURL</code> is correct, and that the Realtime Database has been created.';}
+  }
+}
+/* ---- live updates pushed from the shared pool ---- */
+let restoredMine=false;
+function restoreMine(e){
+  restoredMine=true;
+  const empty=!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length;
+  if(empty&&e.picks){const p=normPicks(e.picks);if(Object.keys(p.scores).length||Object.keys(p.pens).length){pred.scores=p.scores;pred.pens=p.pens;savePred();predTM=resolveState(pred,true);if(view==='bracket')renderBracket();}}
+  if(!me.name&&e.name){me.name=String(e.name);refreshWhoChip();saveMe();}
+}
+function onRemoteEntries(map){
+  lastRemoteRaw=map||{};
+  const next={};
+  Object.values(map||{}).forEach(e=>{
+    if(!e||!e.id)return;
+    if(e.id===me.id){if(!restoredMine)restoreMine(e);return;}
+    if(entryHasContent(e))next[e.id]={...e,picks:normPicks(e.picks)};   // skip empty "ghost" rows
+  });
+  entries=next;entries[me.id]=myEntry();
+  lastSync=Date.now();updateCounts();updateSyncBadge();
+  if(view==='board')renderBoard();
+}
+/* your username IS your identity in the pool; sign in with an existing one to recover its bracket */
+function applyName(name,opts){
+  opts=opts||{};
+  name=String(name||'').slice(0,28);
+  const targetId=slugId(name)||me.id;            // username -> the only id
+  if(targetId!==me.id){
+    const old=me.id;
+    if(sharedSync())SYNC.removeEntry(old);        // drop my row under the old id (no leftovers)
+    if(keeper&&keeper.uid===old){keeper.uid=targetId;SYNC.putKeeper(keeper);}
+    me.id=targetId;restoredMine=false;
+    const r=lastRemoteRaw[targetId];              // signing in as an existing username? load its bracket
+    if(r&&!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length){
+      const p=normPicks(r.picks);
+      if(Object.keys(p.scores).length||Object.keys(p.pens).length){pred.scores=p.scores;pred.pens=p.pens;savePred();predTM=resolveState(pred,true);if(view==='bracket')renderBracket();}
+    }
+  }
+  me.name=name;
+  refreshWhoChip();
+  document.title=name?`${name} — World Cup 2026 Pool`:'World Cup 2026 — Prediction Pool';
+  entries[me.id]=myEntry();
+  saveMe();
+  if(keeperIsMe()){keeper.name=name||'A friend';SYNC.putKeeper(keeper);updateKeeperUI();}
+  schedule('entry');
+  if(!opts.initial){updateCounts();if(view==='board')renderBoard();}
+}
+function onRemoteResults(r){
+  if(r&&(r.updatedAt||0)>(actual.updatedAt||0)){
+    actual.scores=r.scores||{};actual.pens=r.pens||{};actual.updatedAt=r.updatedAt||0;actual._last={};
+    actualTM=resolveState(actual,true);
+    renderActive();updateCounts();   // table re-ranks in real time
+  }
+  lastSync=Date.now();updateSyncBadge();
+}
+function onRemoteKeeper(k){
+  const was=keeper&&keeper.uid;
+  keeper=(k&&k.uid)?k:null;
+  updateKeeperUI();
+  if(view==='results')renderResults();
+  if(keeper&&keeper.uid!==me.id&&keeper.uid!==was)toast(`${keeper.name||'A friend'} is now keeping score`);
+}
+/* ---- username entry gate: the only way you get an identity ---- */
+function showGate(){
+  const inp=document.getElementById('gateInput');
+  inp.value=me.name||'';
+  document.getElementById('gateMsg').textContent='';
+  document.getElementById('gateBtn').textContent=me.name?'Continue as '+me.name:'Enter the pool';
+  document.getElementById('gate').classList.remove('hidden');
+  setTimeout(()=>{inp.focus();inp.select();},40);
+}
+function hideGate(){document.getElementById('gate').classList.add('hidden');}
+function submitGate(){
+  const inp=document.getElementById('gateInput'),val=String(inp.value||'').trim();
+  if(!slugId(val)){document.getElementById('gateMsg').textContent='Enter a username with at least one letter or number.';inp.focus();return;}
+  applyName(val,{syncField:true});       // username becomes your identity (and pushes you into the pool)
+  hideGate();
+  renderActive();updateCounts();updateKeeperUI();
+}
+function init(){
+  const m=lsGet('wc26_me');
+  me.id=(m&&m.id)?m.id:genId();             // placeholder id until a username is chosen at the gate
+  me.name=(m&&m.name)||'';
+  const sp=lsGet('wc26_pred');if(sp){pred.scores=sp.scores||{};pred.pens=sp.pens||{};}  // restore my bracket
+  const imp=lsGet('wc26_imports');if(Array.isArray(imp))imp.forEach(e=>{if(e&&e.id)imports[e.id]=e;});
+  refreshWhoChip();
+  predTM=resolveState(pred,true);actualTM=resolveState(actual,true);
+
+  SYNC.on('entries',onRemoteEntries);
+  SYNC.on('results',onRemoteResults);
+  SYNC.on('keeper',onRemoteKeeper);
+  SYNC.start();
+
+  setView('bracket');updateCounts();updateSyncBadge();updateKeeperUI();
+  if(SYNC.mode==='claude'){SYNC.pollClaude();setInterval(()=>SYNC.pollClaude(),6000);}
+
+  showGate();   // every open asks for your username before you're in the pool
+}
+init();
+</script>
+</body>
+</html>
