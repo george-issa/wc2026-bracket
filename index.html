@@ -208,7 +208,17 @@
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(18px);background:#163A2F;border:1px solid var(--gold);color:var(--text);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 14px 34px -12px rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:86vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  @media print{body{background:#fff}.toprow,.tabs,.vbar,.share,.keeperbar,.setupbanner,footer.ft{display:none}.scroll{max-height:none;overflow:visible;border:none}}
+  @media print{
+    @page{size:landscape;margin:8mm}
+    html,body{background:#fff}
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .wrap{max-width:none;padding:0}
+    .toprow,.tabs,.vbar,.share,.keeperbar,.setupbanner,.sub,#gate,#toast,footer.ft{display:none !important}
+    header.hd{border:none;border-radius:0;background:none;padding:0 0 6px}
+    .scroll{overflow:visible;max-height:none;border:none;border-radius:0;background:#fff}
+    /* the bracket canvas is ~2150px wide — scale it (layout-aware via zoom) so the whole thing fits one landscape page */
+    #canvas{zoom:.45}
+  }
 </style>
 </head>
 <body>
