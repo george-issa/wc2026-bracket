@@ -268,6 +268,7 @@
       <span class="tag"><span class="pts two">2</span> exact score</span>
       <span class="tag"><span class="pts one">1</span> right team through</span>
       <span class="tag" style="color:var(--muted2)">0 otherwise</span>
+      <span class="tag" style="flex-basis:100%;color:var(--muted2)">Penalty shootouts: <b style="color:var(--gold)">2</b> for calling the draw · <b style="color:var(--green)">3</b> if you also call the shootout winner · <b style="color:var(--accent)">1</b> for naming the team that wins on PKs without predicting a draw</span>
     </div>
 
     <div class="tabs">
@@ -487,11 +488,20 @@ function pointsFor(picks,picksTM,id){
 /* OFFICIAL picks are scored against the REAL matchups (actualTM) and real result */
 function pointsForOfficial(off,id){
   const av=(actual.scores||{})[id]; if(!av||av[0]==null||av[1]==null) return null;
-  const aW=winnerIdFor(actual,actualTM,id); if(aW==null) return null;
+  const aW=winnerIdFor(actual,actualTM,id); if(aW==null) return null;   // tie w/o a PK winner = not scorable yet
   const pv=(off&&off.scores||{})[id];
-  if(pv && pv[0]===av[0] && pv[1]===av[1]) return 2;
-  const pW=winnerIdFor(off||{},actualTM,id);   // your predicted winner among the REAL teams
-  if(pW!=null && pW===aW) return 1;
+  if(av[0]===av[1]){                              // the REAL match was a draw decided on penalties
+    const predDraw = pv && pv[0]!=null && pv[1]!=null && pv[0]===pv[1];
+    if(predDraw){                                 // you called the draw → 2, +1 if you also called the shootout winner
+      const pPK=(off&&off.pens||{})[id];
+      return (pPK && pPK===aW) ? 3 : 2;
+    }
+    const pW=winnerIdFor(off||{},actualTM,id);    // you predicted a clean win
+    return (pW!=null && pW===aW) ? 1 : 0;         // right team lifted it on PKs → 1
+  }
+  if(pv && pv[0]===av[0] && pv[1]===av[1]) return 2;   // exact score on a decisive match
+  const pW=winnerIdFor(off||{},actualTM,id);           // your predicted winner among the REAL teams
+  if(pW!=null && pW===aW) return 1;                     // right team through
   return 0;
 }
 
@@ -852,7 +862,7 @@ function pRow(m,open){
   const teamA=a?`<span class="flag">${a.flag}</span><span class="tn">${a.name}</span>`:`<span class="tn" style="color:var(--muted2)">TBD</span>`;
   const teamB=b?`<span class="tn">${b.name}</span><span class="flag">${b.flag}</span>`:`<span class="tn" style="color:var(--muted2)">TBD</span>`;
   const p=pointsForOfficial(official,m.id);
-  const badge=(p!=null)?`<span class="ptbadge inline ${p===2?'p2':p===1?'p1':''}">+${p}</span>`:'';
+  const badge=(p!=null)?`<span class="ptbadge inline ${p>=2?'p2':p===1?'p1':''}">+${p}</span>`:'';
   return `<div class="rrow${dis?' locked':''}">`
     +`<div class="rtop">`
       +`<div class="rteam a">${teamA}</div>`
@@ -888,7 +898,7 @@ function computeBoard(){
   return allEntries().map(e=>{
     const off=normPicks(e.official);
     let pts=0,exact=0,team=0,scored=0;
-    MAIN_IDS.forEach(id=>{const p=pointsForOfficial(off,id);if(p==null)return;scored++;if(p===2){pts+=2;exact++;}else if(p===1){pts+=1;team++;}});
+    MAIN_IDS.forEach(id=>{const p=pointsForOfficial(off,id);if(p==null)return;scored++;pts+=p;if(p>=2)exact++;else if(p===1)team++;});
     return {id:e.id,name:e.name||'(no name)',pts,exact,team,scored,me:e.id===me.id};
   }).sort((x,y)=>y.pts-x.pts||y.exact-x.exact||x.name.localeCompare(y.name));
 }
