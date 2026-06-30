@@ -511,6 +511,8 @@ let prevRanks={};           // leaderboard id -> last rank, for ▲▼ movement
 let RES_LOCK=false;         // results read-only here (someone else is keeping score)
 let official={scores:{},pens:{}};   // your OFFICIAL, round-gated picks (these are scored)
 let kickoffsShared={};              // shared kickoff-time overrides (gerges-editable)
+let myTs=0;                         // when MY picks last changed locally (drives cross-device merge)
+let seenRemote=false;              // have we received the first shared snapshot yet?
 
 /* =========================================================
    SYNC  —  Firebase real-time  ▸  Claude store  ▸  local-only
@@ -530,7 +532,7 @@ function lsGet(k){try{return LS?JSON.parse(LS.getItem(k)):null;}catch(e){return 
 function lsSet(k,v){try{LS&&LS.setItem(k,JSON.stringify(v));}catch(e){}}
 function saveMe(){lsSet('wc26_me',{id:me.id,name:me.name,pw:me.pw||''});}
 function saveImports(){lsSet('wc26_imports',Object.values(imports));}
-function myEntry(){return {id:me.id,name:me.name||'',pw:me.pw||'',picks:{scores:pred.scores,pens:pred.pens},official:{scores:official.scores,pens:official.pens},updatedAt:Date.now()};}
+function myEntry(){return {id:me.id,name:me.name||'',pw:me.pw||'',picks:{scores:pred.scores,pens:pred.pens},official:{scores:official.scores,pens:official.pens},updatedAt:myTs||Date.now()};}
 function savePred(){lsSet('wc26_pred',{scores:pred.scores,pens:pred.pens});}
 function saveOfficial(){lsSet('wc26_official',{scores:official.scores,pens:official.pens});}
 /* soft password hash (cyrb53), salted by the username's id — protects picks from casual overwrite */
@@ -607,7 +609,9 @@ const SYNC={
 /* debounced shared writes */
 let saveTimers={};
 function schedule(kind){clearTimeout(saveTimers[kind]);saveTimers[kind]=setTimeout(()=>{
-  if(kind==='entry'){if(hasPresence())SYNC.putEntry(myEntry());else SYNC.removeEntry(me.id);}
+  if(kind==='entry'){
+    if(SYNC.mode==='firebase'&&!seenRemote)return;   // hold the first push until we've merged the snapshot
+    if(hasPresence())SYNC.putEntry(myEntry());else SYNC.removeEntry(me.id);}
   else if(kind==='results')SYNC.putResults({scores:actual.scores,pens:actual.pens,updatedAt:actual.updatedAt,by:(keeper&&keeper.name)||me.name||''});
 },400);}
 
@@ -670,9 +674,9 @@ function stepState(state,id,slot,delta){
 }
 function setPenState(state,id,team){state.pens[id]=(state.pens[id]===team?undefined:team);if(state.pens[id]==null)delete state.pens[id];}
 
-function afterPred(){predTM=resolveState(pred,true);entries[me.id]=myEntry();savePred();schedule('entry');renderActive();updateCounts();}
+function afterPred(){myTs=Date.now();lsSet('wc26_ts',myTs);predTM=resolveState(pred,true);entries[me.id]=myEntry();savePred();schedule('entry');renderActive();updateCounts();}
 function afterActual(){actual.updatedAt=Date.now();actualTM=resolveState(actual,true);schedule('results');renderActive();updateCounts();}
-function afterOfficial(){entries[me.id]=myEntry();saveOfficial();schedule('entry');renderActive();updateCounts();}
+function afterOfficial(){myTs=Date.now();lsSet('wc26_ts',myTs);entries[me.id]=myEntry();saveOfficial();schedule('entry');renderActive();updateCounts();}
 
 const rnd=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
 function surprise(){
@@ -1024,14 +1028,43 @@ function updateSyncBadge(){
   }
 }
 /* ---- live updates pushed from the shared pool ---- */
-let restoredMine=false;
-function restoreMine(e){
+let restoredMine=false;   // retained: applyName resets it when the identity changes
+/* UNION-merge one pick map into another. Missing picks are always filled in from `remote`;
+   on a genuine conflict (same match, different score) the newer side wins (remoteWins). */
+function mergeInto(local,remote,remoteWins){
+  let changed=false;
+  const ls=local.scores||(local.scores={}),rs=remote.scores||{};
+  Object.keys(rs).forEach(id=>{
+    const rv=Array.isArray(rs[id])?rs[id].slice():rs[id];
+    if(!(id in ls)){ls[id]=rv;changed=true;}
+    else if(remoteWins&&JSON.stringify(ls[id])!==JSON.stringify(rv)){ls[id]=rv;changed=true;}
+  });
+  const lp=local.pens||(local.pens={}),rp=remote.pens||{};
+  Object.keys(rp).forEach(id=>{
+    if(!(id in lp)){lp[id]=rp[id];changed=true;}
+    else if(remoteWins&&lp[id]!==rp[id]){lp[id]=rp[id];changed=true;}
+  });
+  return changed;
+}
+/* Pull MY own entry from the shared pool and merge it into local, so picks I made on
+   another device show up here too — fixes per-device point drift. Pushes the merged
+   union back so every device converges on the same picks. */
+function reconcileMine(e){
   restoredMine=true;
-  if(!Object.keys(pred.scores).length&&!Object.keys(pred.pens).length&&e.picks){const p=normPicks(e.picks);if(Object.keys(p.scores).length||Object.keys(p.pens).length){pred.scores=p.scores;pred.pens=p.pens;savePred();predTM=resolveState(pred,true);}}
-  if(!Object.keys(official.scores).length&&!Object.keys(official.pens).length&&e.official){const o=normPicks(e.official);if(Object.keys(o.scores).length||Object.keys(o.pens).length){official.scores=o.scores;official.pens=o.pens;saveOfficial();}}
+  const rTs=e.updatedAt||0,rNewer=rTs>myTs;
+  let changed=false;
+  if(e.picks)changed=mergeInto(pred,normPicks(e.picks),rNewer)||changed;
+  if(e.official)changed=mergeInto(official,normPicks(e.official),rNewer)||changed;
   if(!me.name&&e.name){me.name=String(e.name);refreshWhoChip();saveMe();}
   if(!me.pw&&e.pw){me.pw=e.pw;saveMe();}
-  renderActive();
+  if(changed){
+    myTs=Math.max(myTs,rTs)||Date.now();lsSet('wc26_ts',myTs);
+    savePred();saveOfficial();
+    predTM=resolveState(pred,true);
+    entries[me.id]=myEntry();
+    schedule('entry');
+    renderActive();updateCounts();
+  }
 }
 function onRemoteKickoffs(k){kickoffsShared=k||{};if(view==='predict')renderPredict();updateCounts();}
 function onRemoteEntries(map){
@@ -1039,10 +1072,11 @@ function onRemoteEntries(map){
   const next={};
   Object.values(map||{}).forEach(e=>{
     if(!e||!e.id)return;
-    if(e.id===me.id){if(!restoredMine)restoreMine(e);return;}
+    if(e.id===me.id){reconcileMine(e);return;}
     if(entryHasContent(e))next[e.id]={...e,picks:normPicks(e.picks)};   // skip empty "ghost" rows
   });
   entries=next;entries[me.id]=myEntry();
+  if(!seenRemote){seenRemote=true;if(hasPresence())schedule('entry');}   // first snapshot merged → safe to push
   lastSync=Date.now();updateCounts();updateSyncBadge();
   if(view==='board')renderBoard();
 }
@@ -1122,6 +1156,7 @@ function init(){
   me.pw=(m&&m.pw)||'';
   const sp=lsGet('wc26_pred');if(sp){pred.scores=sp.scores||{};pred.pens=sp.pens||{};}        // demo bracket
   const so=lsGet('wc26_official');if(so){official.scores=so.scores||{};official.pens=so.pens||{};}  // official picks
+  const mts=lsGet('wc26_ts');if(typeof mts==='number')myTs=mts;                                       // when my picks last changed
   const imp=lsGet('wc26_imports');if(Array.isArray(imp))imp.forEach(e=>{if(e&&e.id)imports[e.id]=e;});
   refreshWhoChip();
   predTM=resolveState(pred,true);actualTM=resolveState(actual,true);
